@@ -26,7 +26,7 @@ defmodule UeberauthLine.Mixfile do
 
     defp deps do
       [
-        {:ueberauth, "~> 0.2"},
+        {:ueberauth, github: "ueberauth/ueberauth", ref: "5b34fadfdf696dd1e25f4d3317634e619dcae35e", override: true},
         {:oauth2, "~> 0.5"},
         {:ex_doc, "~> 0.1", only: :dev},
         {:earmark, ">= 0.0.0", only: :dev},
