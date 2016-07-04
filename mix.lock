@@ -12,4 +12,4 @@
   "plug": {:hex, :plug, "1.1.6", "8927e4028433fcb859e000b9389ee9c37c80eb28378eeeea31b0273350bf668b", [:mix], [{:cowboy, "~> 1.0", [hex: :cowboy, optional: true]}]},
   "poison": {:hex, :poison, "2.2.0", "4763b69a8a77bd77d26f477d196428b741261a761257ff1cf92753a0d4d24a63", [:mix], []},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0", "edee20847c42e379bf91261db474ffbe373f8acb56e9079acb6038d4e0bf414f", [:rebar, :make], []},
-  "ueberauth": {:hex, :ueberauth, "0.2.0", "9160c601b468c6692462a56be7ad8890d1a2d84519d7d9c4541da5b07d6495e1", [:mix], [{:plug, "~> 1.0", [hex: :plug, optional: false]}]}}
+  "ueberauth": {:git, "https://github.com/ueberauth/ueberauth.git", "5b34fadfdf696dd1e25f4d3317634e619dcae35e", [ref: "5b34fadfdf696dd1e25f4d3317634e619dcae35e"]}}

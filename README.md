@@ -12,7 +12,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:ueberauth_line, "~> 0.1.0"}]
+      [{:ueberauth_line, "~> 0.1.1"}]
     end
     ```
 
