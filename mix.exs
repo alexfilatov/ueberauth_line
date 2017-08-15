@@ -1,7 +1,6 @@
 defmodule UeberauthLine.Mixfile do
   use Mix.Project
-    @version "0.1.1"
-    @url "https://github.com/alexfilatov/ueberauth_line"
+  @version "0.1.1"
 
   def project do
     [
@@ -12,8 +11,6 @@ defmodule UeberauthLine.Mixfile do
       elixir: "~> 1.3",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      source_url: @url,
-      homepage_url: @url,
       description: description,
       deps: deps(),
       docs: docs
@@ -26,7 +23,7 @@ defmodule UeberauthLine.Mixfile do
 
     defp deps do
       [
-        {:ueberauth, github: "ueberauth/ueberauth", ref: "5b34fadfdf696dd1e25f4d3317634e619dcae35e", override: true},
+        {:ueberauth, "~> 0.4"},
         {:oauth2, "~> 0.5"},
         {:ex_doc, "~> 0.1", only: :dev},
         {:earmark, ">= 0.0.0", only: :dev},
@@ -50,8 +47,7 @@ defmodule UeberauthLine.Mixfile do
       [
         files: ["lib", "mix.exs", "README.md", "LICENSE"],
         maintainers: ["Alex Filatov"],
-        licenses: ["MIT"],
-        links: %{"GitHub": @url}
+        licenses: ["MIT"]
       ]
     end
 

@@ -4,7 +4,7 @@ defmodule Ueberauth.Strategy.Line do
   """
   use Ueberauth.Strategy, default_scope: "",
                           profile_fields: "",
-                          uid_field: :mid,
+                          uid_field: :userId,
                           allowed_request_params: [
                             :auth_type,
                           ]
@@ -43,8 +43,8 @@ defmodule Ueberauth.Strategy.Line do
           err = other_params["error"]
           desc = other_params["error_description"]
           set_errors!(conn, [error(err, desc)])
-        token ->
-          fetch_user(conn, token)
+        client ->
+          fetch_user(conn, client)
     end
   end
 
@@ -64,7 +64,12 @@ defmodule Ueberauth.Strategy.Line do
   Fetches the uid field from the response.
   """
   def uid(conn) do
-    conn.private.line_user["mid"]
+    uid_field =
+      conn
+      |> option(:uid_field)
+      |> to_string
+
+    conn.private.line_user[uid_field]
   end
 
   @doc """
@@ -114,13 +119,11 @@ defmodule Ueberauth.Strategy.Line do
     image_url
   end
 
-  defp fetch_user(conn, token) do
-    conn = put_private(conn, :line_token, token)
-    path = "https://api.line.me/v1/profile"
-
-    oauth_response = OAuth2.AccessToken.get(token, path)
-
-    case oauth_response do
+  defp fetch_user(conn, client) do
+    conn = put_private(conn, :line_token, client.token)
+    url = "https://api.line.me/v2/profile"
+    response = OAuth2.Client.get(client, url)
+    case response do
       {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])
       {:ok, %OAuth2.Response{status_code: status_code, body: user}}
