@@ -26,8 +26,7 @@ defmodule UeberauthLine.Mixfile do
       {:ueberauth, "~> 0.4"},
       {:oauth2, "~> 2.0"},
       {:ex_doc, "~> 0.1", only: :dev},
-      {:earmark, ">= 0.0.0", only: :dev},
-      {:dogma, ">= 0.0.0", only: [:dev, :test]}
+      {:earmark, ">= 0.0.0", only: :dev}
     ]
   end
 
