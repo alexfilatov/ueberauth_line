@@ -15,7 +15,7 @@ defmodule Ueberauth.Strategy.Line.OAuth do
     strategy: __MODULE__,
     site: "https://access.line.me",
     authorize_url: "https://access.line.me/dialog/oauth/weblogin",
-    token_url: "https://api.line.me/v2/oauth/accessToken",
+    token_url: "https://api.line.me/v2/oauth/accessToken"
   ]
 
   @doc """
@@ -47,9 +47,10 @@ defmodule Ueberauth.Strategy.Line.OAuth do
   end
 
   def get_token!(params \\ [], opts \\ []) do
-    token = opts
-    |> client
-    |> OAuth2.Client.get_token!(params)
+    token =
+      opts
+      |> client
+      |> OAuth2.Client.get_token!(params)
 
     token
   end
