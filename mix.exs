@@ -7,13 +7,13 @@ defmodule UeberauthLine.Mixfile do
       app: :ueberauth_line,
       version: @version,
       name: "Ueberauth LINE Strategy",
-      package: package,
+      package: package(),
       elixir: "~> 1.3",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      description: description,
+      description: description(),
       deps: deps(),
-      docs: docs
+      docs: docs()
     ]
   end
 
@@ -32,7 +32,7 @@ defmodule UeberauthLine.Mixfile do
   end
 
   defp docs do
-    [extras: docs_extras, main: "extra-readme"]
+    [extras: docs_extras(), main: "extra-readme"]
   end
 
   defp docs_extras do
