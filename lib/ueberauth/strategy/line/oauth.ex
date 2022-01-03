@@ -47,12 +47,9 @@ defmodule Ueberauth.Strategy.Line.OAuth do
   end
 
   def get_token!(params \\ [], opts \\ []) do
-    token =
-      opts
-      |> client
-      |> OAuth2.Client.get_token!(params)
-
-    token
+    opts
+    |> client
+    |> OAuth2.Client.get_token!(params)
   end
 
   # Strategy Callbacks

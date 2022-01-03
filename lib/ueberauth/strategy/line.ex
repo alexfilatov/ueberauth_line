@@ -141,8 +141,9 @@ defmodule Ueberauth.Strategy.Line do
   end
 
   defp option(conn, key) do
-    default = default_options()
-    |> Map.get(key)
+    default =
+      default_options()
+      |> Map.get(key)
 
     conn
     |> options
