@@ -37,7 +37,7 @@ defmodule Ueberauth.Strategy.Line do
   @doc """
   Handles the callback from Line.
   """
-  def handle_callback!(%Plug.Conn{params: %{"code" => code, "state" => state}} = conn) do
+  def handle_callback!(%Plug.Conn{params: %{"code" => code, "state" => _}} = conn) do
     opts = [redirect_uri: callback_url(conn)]
 
     case Ueberauth.Strategy.Line.OAuth.get_token!([code: code], opts) do
@@ -141,13 +141,11 @@ defmodule Ueberauth.Strategy.Line do
   end
 
   defp option(conn, key) do
-    default = Dict.get(default_options, key)
+    default = default_options()
+    |> Map.get(key)
 
     conn
     |> options
-    |> Dict.get(key, default)
+    |> Map.get(key, default)
   end
-
-  defp option(nil, conn, key), do: option(conn, key)
-  defp option(value, _conn, _key), do: value
 end
