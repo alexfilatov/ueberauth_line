@@ -46,7 +46,11 @@ defmodule UeberauthLine.Mixfile do
     [
       files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Alex Filatov"],
-      licenses: ["MIT"]
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/alexfilatov/ueberauth_line",
+        "Docs" => "https://hexdocs.pm/ueberauth_line"
+      }
     ]
   end
 end
