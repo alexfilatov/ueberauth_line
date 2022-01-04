@@ -12,7 +12,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ```elixir
     def deps do
-      [{:ueberauth_line, "~> 0.1.1"}]
+      [{:ueberauth_line, "~> 0.1.2"}]
     end
 ```
 
@@ -64,4 +64,3 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 ## Set up LINE Channel
 
   Follow instructions here https://developers.line.me/line-login/overview
-
