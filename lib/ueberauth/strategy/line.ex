@@ -1,6 +1,6 @@
 defmodule Ueberauth.Strategy.Line do
   @moduledoc """
-  Line Strategy for Überauth.
+  Line Login v2.1 Strategy for Überauth.
   """
   use Ueberauth.Strategy,
     default_scope: "",

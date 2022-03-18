@@ -14,8 +14,8 @@ defmodule Ueberauth.Strategy.Line.OAuth do
   @defaults [
     strategy: __MODULE__,
     site: "https://access.line.me",
-    authorize_url: "https://access.line.me/dialog/oauth/weblogin",
-    token_url: "https://api.line.me/v2/oauth/accessToken"
+    authorize_url: "https://access.line.me/oauth2/v2.1/authorize",
+    token_url: "https://api.line.me/oauth2/v2.1/token"
   ]
 
   @doc """
