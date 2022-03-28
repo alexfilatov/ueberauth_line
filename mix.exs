@@ -26,7 +26,11 @@ defmodule UeberauthLine.Mixfile do
       {:ueberauth, "~> 0.4"},
       {:oauth2, "~> 2.0"},
       {:ex_doc, "~> 0.1", only: :dev},
-      {:earmark, ">= 0.0.0", only: :dev}
+      {:earmark, ">= 0.0.0", only: :dev},
+      {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:mock, "~> 0.3", only: :test},
+      {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
+      {:floki, ">= 0.30.0", only: :test}
     ]
   end
 
