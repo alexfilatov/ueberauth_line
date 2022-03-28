@@ -64,3 +64,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 ## Set up LINE Channel
 
   Follow instructions here https://developers.line.me/line-login/overview
+
+
+## Side notes
+This library uses Erlang `:crypto.strong_rand_bytes` for nonce and state generation. Make sure that `RAND_bytes` method from OpenSSL is available.
