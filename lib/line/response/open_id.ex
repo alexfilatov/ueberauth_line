@@ -11,4 +11,6 @@ defmodule Line.Response.OpenId do
     iat: 0,
     amr: []
   ]
+
+  @type t :: module
 end

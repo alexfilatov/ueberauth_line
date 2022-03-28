@@ -20,7 +20,6 @@ defmodule Http.Client do
   end
 
   @doc """
-
   HTTP POST request
   """
   @impl true
