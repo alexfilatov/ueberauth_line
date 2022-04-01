@@ -16,23 +16,24 @@ defmodule Line.Api.VerifyIdTokenTest do
         Client,
         [:passthrough],
         [
-          post: &client_post/3
+          request: &client_request/1
         ]
       }
     ]) do
       :ok
     end
 
-    def client_post(
-          %{
+    def client_request(%{
+          method: :post,
+          endpoint: "https://api.line.me/oauth2/v2.1/verify",
+          headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+          body: %{
             "id_token" => "1234567890",
             "client_id" => "qwqwe",
             "nonce" => "zaq123456",
             "user_id" => "qweqwe"
-          },
-          %{"Content-Type" => "application/x-www-form-urlencoded"},
-          "https://api.line.me/oauth2/v2.1/verify"
-        ) do
+          }
+        }) do
       response(
         200,
         %{
@@ -50,14 +51,15 @@ defmodule Line.Api.VerifyIdTokenTest do
       )
     end
 
-    def client_post(
-          %{
+    def client_request(%{
+          method: :post,
+          endpoint: "https://api.line.me/oauth2/v2.1/verify",
+          headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+          body: %{
             "id_token" => "1234567890",
             "client_id" => "qwqwe"
-          },
-          %{"Content-Type" => "application/x-www-form-urlencoded"},
-          "https://api.line.me/oauth2/v2.1/verify"
-        ) do
+          }
+        }) do
       response(
         200,
         %{
@@ -71,11 +73,12 @@ defmodule Line.Api.VerifyIdTokenTest do
       )
     end
 
-    def client_post(
-          body,
-          _,
-          "https://api.line.me/oauth2/v2.1/verify"
-        ) do
+    def client_request(%{
+          method: :post,
+          endpoint: "https://api.line.me/oauth2/v2.1/verify",
+          headers: _,
+          body: _
+        }) do
       response(
         400,
         %{
@@ -123,7 +126,7 @@ defmodule Line.Api.VerifyIdTokenTest do
              } = LineApi.verify_id_token(request)
     end
 
-    test "it returns error for invalid credentials" do
+    test "it returns error with invalid credentials" do
       request = %VerifyIdToken{
         id_token: "invalid",
         client_id: "qwqwe",

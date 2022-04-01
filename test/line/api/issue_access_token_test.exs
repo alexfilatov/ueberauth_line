@@ -16,18 +16,19 @@ defmodule Line.Api.IssueAccessTokenTest do
         Client,
         [:passthrough],
         [
-          post: &client_post/3
+          request: &client_request/1
         ]
       }
     ]) do
       :ok
     end
 
-    def client_post(
-          %{"client_id" => "1234567890"},
-          %{"Content-Type" => "application/x-www-form-urlencoded"},
-          "https://api.line.me/oauth2/v2.1/token"
-        ) do
+    def client_request(%{
+          method: :post,
+          endpoint: "https://api.line.me/oauth2/v2.1/token",
+          headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+          body: %{"client_id" => "1234567890"}
+        }) do
       response(
         200,
         %{
@@ -41,11 +42,12 @@ defmodule Line.Api.IssueAccessTokenTest do
       )
     end
 
-    def client_post(
-          body,
-          _,
-          "https://api.line.me/oauth2/v2.1/token"
-        ) do
+    def client_request(%{
+          method: :post,
+          endpoint: "https://api.line.me/oauth2/v2.1/token",
+          headers: _,
+          body: _
+        }) do
       response(
         400,
         %{

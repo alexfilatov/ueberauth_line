@@ -3,20 +3,27 @@ defmodule Line.Request.VerifyAccessToken do
 
   alias Http.RequestApi
   alias Line.Request.VerifyAccessToken
+  alias Http.RequestApi
 
   @behaviour RequestApi
+
+  @endpoint "https://api.line.me/oauth2/v2.1/verify"
 
   typedstruct enforce: true do
     field(:access_token, String.t())
   end
 
-  @spec serialize(t) :: map
+  @spec serialize(t) :: RequestApi.serialized_request()
   @doc """
   Serialize the Request into map
   """
   @impl true
   def serialize(%VerifyAccessToken{} = request) do
-    request
-    |> Mappable.to_map(keys: :strings)
+    %{
+      method: :get,
+      endpoint: @endpoint,
+      headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+      body: Mappable.to_map(request, keys: :strings)
+    }
   end
 end

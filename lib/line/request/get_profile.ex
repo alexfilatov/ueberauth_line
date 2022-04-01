@@ -1,22 +1,27 @@
-defmodule Line.Request.VerifyIdToken do
+defmodule Line.Request.GetProfile do
   use TypedStruct
 
-  alias Line.Request.VerifyIdToken
+  alias Line.Request.GetProfile
+  alias Http.RequestApi
+
+  @behaviour RequestApi
+
+  @endpoint "https://api.line.me/v2/profile"
 
   typedstruct enforce: true do
-    field(:id_token, String.t())
-    field(:client_id, String.t())
-    field(:user_id, String.t(), enforce: false)
-    field(:nonce, String.t(), enforce: false)
+    field(:access_token, String.t())
   end
 
-  @spec serialize(t) :: map
+  @spec serialize(t) :: RequestApi.serialized_request()
   @doc """
   Serialize the Request into map
   """
   @impl true
-  def serialize(%VerifyIdToken{} = request) do
-    request
-    |> Mappable.to_map(keys: :strings)
+  def serialize(%GetProfile{} = request) do
+    %{
+      method: :get,
+      endpoint: @endpoint,
+      headers: Mappable.to_map(request, keys: :strings)
+    }
   end
 end

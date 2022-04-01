@@ -8,7 +8,7 @@ defmodule UeberauthLine.Mixfile do
       version: @version,
       name: "Ueberauth LINE Strategy",
       package: package(),
-      elixir: "~> 1.12",
+      elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -19,9 +19,10 @@ defmodule UeberauthLine.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :oauth2, :ueberauth]]
+    [applications: [:logger, :oauth2, :ueberauth, :typed_struct, :mappable]]
   end
 
+  # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 

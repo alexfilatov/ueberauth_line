@@ -16,20 +16,21 @@ defmodule Line.Api.VerifyAccessTokenTest do
         Client,
         [:passthrough],
         [
-          get: &client_get/3
+          request: &client_request/1
         ]
       }
     ]) do
       :ok
     end
 
-    def client_get(
-          %{
+    def client_request(%{
+          method: :get,
+          endpoint: "https://api.line.me/oauth2/v2.1/verify",
+          body: %{
             "access_token" => "abcd123123"
           },
-          %{"Content-Type" => "application/x-www-form-urlencoded"},
-          "https://api.line.me/oauth2/v2.1/verify"
-        ) do
+          headers: %{"Content-Type" => "application/x-www-form-urlencoded"}
+        }) do
       response(
         200,
         %{
@@ -40,11 +41,12 @@ defmodule Line.Api.VerifyAccessTokenTest do
       )
     end
 
-    def client_get(
-          query_params,
-          _,
-          "https://api.line.me/oauth2/v2.1/verify"
-        ) do
+    def client_request(%{
+          method: :get,
+          endpoint: "https://api.line.me/oauth2/v2.1/verify",
+          body: _,
+          headers: _
+        }) do
       response(
         400,
         %{

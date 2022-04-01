@@ -13,42 +13,34 @@ defmodule Http.ClientTest do
 
   describe "given Config with configured client" do
     setup_with_mocks([
-      {Config, [:passthrough],
-       [
-         get_client!: &config_get_client!/0
-       ]}
+      {
+        Config,
+        [:passthrough],
+        [
+          get_client!: &config_get_client!/0
+        ]
+      }
     ]) do
       Code.require_file("test/http/client_mock.exs")
 
       :ok
     end
 
-    test "it executes GET request" do
-      query_params = %{param: :foobar}
-      headers = %{foo: :bar}
-      url = "some/url"
+    test "it executes request" do
+      serialized = %{
+        method: :post,
+        endpoint: "https://example.com/url",
+        headers: %{
+          foo: :bar
+        },
+        body: %{
+          param: :foobar
+        }
+      }
 
       assert %{
-               mocked: {
-                 ^query_params,
-                 ^headers,
-                 ^url
-               }
-             } = Client.get(query_params, headers, url)
-    end
-
-    test "it executes POST request" do
-      body = %{param: 42}
-      headers = %{foo: :bar}
-      url = "some/url"
-
-      assert %{
-               mocked: {
-                 ^body,
-                 ^headers,
-                 ^url
-               }
-             } = Client.post(body, headers, url)
+               mocked: ^serialized
+             } = Client.request(serialized)
     end
   end
 end

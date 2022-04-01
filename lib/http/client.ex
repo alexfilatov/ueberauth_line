@@ -8,24 +8,16 @@ defmodule Http.Client do
   """
 
   alias Http.Config
+  alias Http.RequestApi
 
   @behaviour Http.ClientApi
 
-  @spec get(ClientApi.query_params(), ClientApi.headers(), ClientApi.url()) :: ClientApi.result()
+  @spec request(ClientApi.serialized_request()) :: ClientApi.result()
   @doc """
-  HTTP GET request.
+  Generic request.
   """
   @impl true
-  def get(query_params, headers, url) do
-    Config.get_client!().get(query_params, headers, url)
-  end
-
-  @spec post(ClientApi.body(), ClientApi.headers(), ClientApi.url()) :: ClientApi.result()
-  @doc """
-  HTTP POST request
-  """
-  @impl true
-  def post(body, headers, url) do
-    Config.get_client!().post(body, headers, url)
+  def request(serialized_request) do
+    Config.get_client!().request(serialized_request)
   end
 end

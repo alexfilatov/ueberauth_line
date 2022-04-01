@@ -3,8 +3,12 @@ defmodule Line.Request.Token do
 
   alias Http.RequestApi
   alias Line.Request.Token
+  alias Http.RequestApi
+  alias Http.Payload
 
   @behaviour RequestApi
+
+  @endpoint "https://api.line.me/oauth2/v2.1/token"
 
   typedstruct enforce: true do
     field(:grant_type, String.t())
@@ -15,13 +19,23 @@ defmodule Line.Request.Token do
     field(:code_verifier, String.t(), enforce: false)
   end
 
-  @spec serialize(t) :: map
+  @spec serialize(t) :: RequestApi.serialized_request()
   @doc """
   Serialize the Request into map
   """
   @impl true
   def serialize(%Token{} = request) do
+    %{
+      method: :post,
+      endpoint: @endpoint,
+      headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+      body: prepare_body(request)
+    }
+  end
+
+  defp prepare_body(request) do
     request
     |> Mappable.to_map(keys: :strings)
+    |> Payload.remove_nils()
   end
 end

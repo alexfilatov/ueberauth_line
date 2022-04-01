@@ -1,4 +1,6 @@
 defmodule Http.ClientApi do
+  alias Http.RequestApi
+
   @type t :: module
 
   @type body :: map()
@@ -6,16 +8,15 @@ defmodule Http.ClientApi do
   @type headers :: tuple()
   @type url :: String.t()
 
+  @type endpoint :: String.t()
+  @type http_method :: atom()
+
+  @type serialized_request :: %{method: http_method, endpoint: endpoint, headers: map, body: map}
   @type response :: %{status: integer(), body: map(), headers: map()}
   @type result :: {:ok, response} | {:error, String.t()}
 
   @doc """
-  HTTP GET request.
+  Generic request.
   """
-  @callback get(query_params, headers, url) :: result
-
-  @doc """
-  HTTP POST request
-  """
-  @callback post(body, headers, url) :: result
+  @callback request(serialized_request) :: result
 end

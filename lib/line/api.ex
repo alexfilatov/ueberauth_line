@@ -5,7 +5,6 @@ defmodule Line.Api do
   TODO:
   - refresh access token
   - revoke access token
-  - profile
   - friendship status
   """
 
@@ -14,16 +13,11 @@ defmodule Line.Api do
   alias Line.Request.{VerifyIdToken, Token, VerifyAccessToken, GetProfile}
   alias Line.Response.{Error, AccessToken, OpenId, VerifiedAccessToken, Profile}
 
-  @header_content_type %{"Content-Type" => "application/x-www-form-urlencoded"}
-  @api_issue_access_token "https://api.line.me/oauth2/v2.1/token"
-  @api_verify_token "https://api.line.me/oauth2/v2.1/verify"
-  @api_profile "https://api.line.me/v2/profile"
-
   @spec issue_access_token(Token.t()) :: {:ok, AccessToken.t()} | {:error, Error.t()}
   def issue_access_token(%Token{} = request) do
     request
     |> Token.serialize()
-    |> Client.post(@header_content_type, @api_issue_access_token)
+    |> Client.request()
     |> parse_response(AccessToken)
   end
 
@@ -32,7 +26,7 @@ defmodule Line.Api do
   def verify_access_token(%VerifyAccessToken{} = request) do
     request
     |> VerifyAccessToken.serialize()
-    |> Client.get(@header_content_type, @api_verify_token)
+    |> Client.request()
     |> parse_response(VerifiedAccessToken)
   end
 
@@ -40,19 +34,15 @@ defmodule Line.Api do
   def verify_id_token(%VerifyIdToken{} = request) do
     request
     |> VerifyIdToken.serialize()
-    |> Client.post(@header_content_type, @api_verify_token)
+    |> Client.request()
     |> parse_response(OpenId)
   end
 
   @spec get_profile(GetProfile.t()) :: {:ok, Profile.t()} | {:error, Error.t()}
   def get_profile(%GetProfile{} = request) do
-    # TODO: return headers and body from serialize
-    # OR just pass whole RequestApi implementation and inside client, decide how to process it
-    # RequestApi must return request type, optional headers and optional body and required url path
-    # add signer for OauthRequest that will enrich the header with appropriate Authorization
     request
     |> GetProfile.serialize()
-    |> Client.get(@header_content_type, @api_profile)
+    |> Client.request()
     |> parse_response(OpenId)
   end
 
