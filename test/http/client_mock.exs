@@ -1,23 +1,24 @@
 defmodule Http.ClientMock do
   @moduledoc """
-  This is a Client Mock for testing purposes.
+  This is a Client Mock for testing purposes. It returns provided parameters as the test verification.
   """
+
+  alias Http.ClientApi
 
   @behaviour Http.ClientApi
 
-  @type url :: String.t()
   @type mocked_response :: %{mocked: {}}
 
-  @spec get(map, String.t()) :: mocked_response
+  @spec get(ClientApi.query_params(), ClientApi.headers(), ClientApi.url()) :: mocked_response
   @doc """
   Mocked GET response. Returns provided parameters as test verification
   """
   @impl true
-  def get(headers, url) do
-    %{mocked: {headers, url}}
+  def get(query_params, headers, url) do
+    %{mocked: {query_params, headers, url}}
   end
 
-  @spec post(map, map, String.t()) :: mocked_response
+  @spec post(ClientApi.body(), ClientApi.headers(), ClientApi.url()) :: mocked_response
   @doc """
   Mocked POST response. Returns provided parameters as test verification
   """

@@ -11,14 +11,16 @@ defmodule Http.Client do
 
   @behaviour Http.ClientApi
 
+  @spec get(ClientApi.query_params(), ClientApi.headers(), ClientApi.url()) :: ClientApi.result()
   @doc """
   HTTP GET request.
   """
   @impl true
-  def get(headers, url) do
-    Config.get_client!().get(headers, url)
+  def get(query_params, headers, url) do
+    Config.get_client!().get(query_params, headers, url)
   end
 
+  @spec post(ClientApi.body(), ClientApi.headers(), ClientApi.url()) :: ClientApi.result()
   @doc """
   HTTP POST request
   """

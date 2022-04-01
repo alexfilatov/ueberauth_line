@@ -1,8 +1,9 @@
-defmodule Line.ApiTest do
+defmodule Line.Api.IssueAccessTokenTest do
   use ExUnit.Case, async: false
   use Plug.Test
 
   import Mock
+  import Line.ApiTestHelper, only: [response: 3, response: 2]
 
   alias Line.Api, as: LineApi
   alias Http.Client
@@ -15,7 +16,6 @@ defmodule Line.ApiTest do
         Client,
         [:passthrough],
         [
-          get: &client_get/2,
           post: &client_post/3
         ]
       }
@@ -23,23 +23,36 @@ defmodule Line.ApiTest do
       :ok
     end
 
-    def client_get(headers, url) do
-      %{}
+    def client_post(
+          %{"client_id" => "1234567890"},
+          %{"Content-Type" => "application/x-www-form-urlencoded"},
+          "https://api.line.me/oauth2/v2.1/token"
+        ) do
+      response(
+        200,
+        %{
+          "access_token" => "bNl4YEFPI/hjFWhTqexp4MuEw5YPs",
+          "expires_in" => 2_592_000,
+          "id_token" => "eyJhbGciOiJIUzI1NiJ9",
+          "refresh_token" => "Aa1FdeggRhTnPNNpxr8p",
+          "scope" => "profile",
+          "token_type" => "Bearer"
+        }
+      )
     end
 
     def client_post(
           body,
-          %{"Content-Type" => "application/x-www-form-urlencoded"},
+          _,
           "https://api.line.me/oauth2/v2.1/token"
         ) do
-      %{
-        "access_token" => "bNl4YEFPI/hjFWhTqexp4MuEw5YPs",
-        "expires_in" => 2_592_000,
-        "id_token" => "eyJhbGciOiJIUzI1NiJ9",
-        "refresh_token" => "Aa1FdeggRhTnPNNpxr8p",
-        "scope" => "profile",
-        "token_type" => "Bearer"
-      }
+      response(
+        400,
+        %{
+          "error" => "invalid_request",
+          "error_description" => "invalid clientId"
+        }
+      )
     end
 
     test "it returns access token" do
@@ -60,6 +73,19 @@ defmodule Line.ApiTest do
                scope: "profile",
                token_type: "Bearer"
              } = LineApi.issue_access_token(request)
+    end
+
+    test "it returns error for invalid credentials" do
+      request = %Token{
+        grant_type: "authorization_code",
+        code: "1234567890abcde",
+        redirect_uri: "https://example.com/auth?key=value",
+        client_id: "invalid-id",
+        client_secret: "1234567890abcdefghij1234567890ab",
+        code_verifier: "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
+      }
+
+      assert %Error{} = LineApi.issue_access_token(request)
     end
   end
 end

@@ -1,7 +1,10 @@
-defmodule Line.Request.GetProfile do
+defmodule Line.Request.VerifyAccessToken do
   use TypedStruct
 
-  alias Line.Request.GetProfile
+  alias Http.RequestApi
+  alias Line.Request.VerifyAccessToken
+
+  @behaviour RequestApi
 
   typedstruct enforce: true do
     field(:access_token, String.t())
@@ -12,7 +15,7 @@ defmodule Line.Request.GetProfile do
   Serialize the Request into map
   """
   @impl true
-  def serialize(%GetProfile{} = request) do
+  def serialize(%VerifyAccessToken{} = request) do
     request
     |> Mappable.to_map(keys: :strings)
   end

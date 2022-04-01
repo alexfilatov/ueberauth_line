@@ -1,43 +1,27 @@
 defmodule Line.Request.Token do
-  defstruct [
-    :code_verifier,
-    grant_type: "",
-    code: "",
-    redirect_uri: "",
-    client_id: "",
-    client_secret: ""
-  ]
-
-  @enforce_keys [:grant_type, :code, :redirect_uri, :client_id, :client_secret]
-
-  @type t :: module
+  use TypedStruct
 
   alias Http.RequestApi
   alias Line.Request.Token
 
   @behaviour RequestApi
 
+  typedstruct enforce: true do
+    field(:grant_type, String.t())
+    field(:code, String.t())
+    field(:redirect_uri, String.t())
+    field(:client_id, String.t())
+    field(:client_secret, String.t())
+    field(:code_verifier, String.t(), enforce: false)
+  end
+
   @spec serialize(t) :: map
   @doc """
   Serialize the Request into map
   """
   @impl true
-  def serialize(%Token{} = token) do
-    %{
-      "grant_type" => token.grant_type,
-      "code" => token.code,
-      "redirect_uri" => token.redirect_uri,
-      "client_id" => token.client_id,
-      "client_secret" => token.client_secret
-    }
-    |> maybe_put_optional(token)
-  end
-
-  defp maybe_put_optional(request, %{code_verifier: code_verifier}) when is_nil(code_verifier),
-    do: request
-
-  defp maybe_put_optional(request, %{code_verifier: code_verifier}) do
+  def serialize(%Token{} = request) do
     request
-    |> Map.put("code_verifier", code_verifier)
+    |> Mappable.to_map(keys: :strings)
   end
 end

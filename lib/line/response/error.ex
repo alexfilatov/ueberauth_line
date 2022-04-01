@@ -1,17 +1,24 @@
 defmodule Line.Response.Error do
-  defstruct error: "", error_description: ""
+  use TypedStruct
 
-  @type t :: module
+  alias Http.ClientApi
+  alias Line.Response.Error
 
   @behaviour Http.ResponseApi
 
-  @spec deserialize(map) :: t
-  @impl true
+  typedstruct do
+    field(:error, String.t())
+    field(:error_description, String.t(), default: "")
+  end
 
-  def deserialize(%{"error" => error, "error_description" => error_description}) do
-    %__MODULE__{
-      error: error,
-      error_description: error_description
-    }
+  @spec deserialize(ClientApi.response()) :: t
+  @impl true
+  def deserialize(%{
+        status: status,
+        body: body
+      })
+      when status >= 400 and is_map(body) do
+    body
+    |> Mappable.to_struct(Error)
   end
 end

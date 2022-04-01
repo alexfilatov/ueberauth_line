@@ -1,32 +1,24 @@
 defmodule Line.Response.AccessToken do
-  defstruct access_token: "",
-            expires_in: 0,
-            id_token: "",
-            refresh_token: "",
-            scope: "",
-            token_type: ""
+  use TypedStruct
 
-  @type t :: module
+  alias Http.ClientApi
+  alias Line.Response.AccessToken
 
   @behaviour Http.ResponseApi
 
-  @spec deserialize(map) :: t
+  typedstruct do
+    field(:access_token, String.t())
+    field(:expires_in, integer())
+    field(:id_token, String.t())
+    field(:refresh_token, String.t())
+    field(:scope, String.t())
+    field(:token_type, String.t())
+  end
+
+  @spec deserialize(ClientApi.response()) :: t
   @impl true
-  def deserialize(%{
-        "access_token" => access_token,
-        "expires_in" => expires_in,
-        "id_token" => id_token,
-        "refresh_token" => refresh_token,
-        "scope" => scope,
-        "token_type" => token_type
-      }) do
-    %__MODULE__{
-      access_token: access_token,
-      expires_in: expires_in,
-      id_token: id_token,
-      refresh_token: refresh_token,
-      scope: scope,
-      token_type: token_type
-    }
+  def deserialize(%{body: body}) when is_map(body) do
+    body
+    |> Mappable.to_struct(AccessToken)
   end
 end

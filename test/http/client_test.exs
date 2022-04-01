@@ -24,15 +24,17 @@ defmodule Http.ClientTest do
     end
 
     test "it executes GET request" do
+      query_params = %{param: :foobar}
       headers = %{foo: :bar}
       url = "some/url"
 
       assert %{
                mocked: {
+                 ^query_params,
                  ^headers,
                  ^url
                }
-             } = Client.get(headers, url)
+             } = Client.get(query_params, headers, url)
     end
 
     test "it executes POST request" do

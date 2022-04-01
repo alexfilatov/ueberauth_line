@@ -8,7 +8,8 @@ defmodule UeberauthLine.Mixfile do
       version: @version,
       name: "Ueberauth LINE Strategy",
       package: package(),
-      elixir: "~> 1.3",
+      elixir: "~> 1.12",
+      elixirc_paths: elixirc_paths(Mix.env()),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
@@ -21,10 +22,15 @@ defmodule UeberauthLine.Mixfile do
     [applications: [:logger, :oauth2, :ueberauth]]
   end
 
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
   defp deps do
     [
       {:ueberauth, "~> 0.4"},
       {:oauth2, "~> 2.0"},
+      {:typed_struct, "~> 0.2.1"},
+      {:mappable, "~> 0.2.0"},
       {:ex_doc, "~> 0.1", only: :dev},
       {:earmark, ">= 0.0.0", only: :dev},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
