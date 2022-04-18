@@ -1,9 +1,9 @@
-defmodule Line.Response.OpenId do
+defmodule LineLogin.Response.OpenId do
   use TypedStruct
 
-  alias Line.Response.OpenId
+  alias LineLogin.Response.OpenId
 
-  @behaviour Http.ResponseApi
+  @behaviour LmHttp.ResponseApi
 
   typedstruct do
     field(:iss, String.t())
@@ -18,7 +18,7 @@ defmodule Line.Response.OpenId do
     field(:nonce, String.t())
   end
 
-  @spec deserialize(ClientApi.response()) :: t
+  @spec deserialize(ClientAdapter.response()) :: t
   @impl true
   def deserialize(%{body: body}) do
     body

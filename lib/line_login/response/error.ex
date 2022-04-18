@@ -1,17 +1,17 @@
-defmodule Line.Response.Error do
+defmodule LineLogin.Response.Error do
   use TypedStruct
 
-  alias Http.ClientApi
-  alias Line.Response.Error
+  alias LineLogin.ClientAdapter
+  alias LineLogin.Response.Error
 
-  @behaviour Http.ResponseApi
+  @behaviour LmHttp.ResponseApi
 
   typedstruct do
     field(:error, String.t())
     field(:error_description, String.t(), default: "")
   end
 
-  @spec deserialize(ClientApi.response()) :: t
+  @spec deserialize(ClientAdapter.response()) :: t
   @impl true
   def deserialize(%{
         status: status,

@@ -1,8 +1,8 @@
-defmodule Line.Request.GetProfile do
+defmodule LineLogin.Request.GetProfile do
   use TypedStruct
 
-  alias Line.Request.GetProfile
-  alias Http.RequestApi
+  alias LineLogin.Request.GetProfile
+  alias LmHttp.RequestApi
 
   @behaviour RequestApi
 

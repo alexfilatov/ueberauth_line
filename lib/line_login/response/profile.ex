@@ -1,7 +1,9 @@
-defmodule Line.Response.Profile do
+defmodule LineLogin.Response.Profile do
   use TypedStruct
 
-  alias Line.Response.Profile
+  alias LineLogin.Response.Profile
+
+  @behaviour LmHttp.ResponseApi
 
   typedstruct do
     field(:user_id, String.t())
@@ -10,7 +12,7 @@ defmodule Line.Response.Profile do
     field(:status_message, String.t())
   end
 
-  @spec deserialize(ClientApi.response()) :: t
+  @spec deserialize(ClientAdapter.response()) :: t
   @impl true
   def deserialize(%{body: body}) when is_map(body) do
     body

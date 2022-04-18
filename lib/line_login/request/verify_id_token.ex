@@ -1,22 +1,19 @@
-defmodule Line.Request.Token do
+defmodule LineLogin.Request.VerifyIdToken do
   use TypedStruct
 
-  alias Http.RequestApi
-  alias Line.Request.Token
-  alias Http.RequestApi
-  alias Http.Payload
+  alias LineLogin.Request.VerifyIdToken
+  alias LmHttp.RequestApi
+  alias LmHttp.Payload
 
   @behaviour RequestApi
 
-  @endpoint "https://api.line.me/oauth2/v2.1/token"
+  @endpoint "https://api.line.me/oauth2/v2.1/verify"
 
   typedstruct enforce: true do
-    field(:grant_type, String.t())
-    field(:code, String.t())
-    field(:redirect_uri, String.t())
+    field(:id_token, String.t())
     field(:client_id, String.t())
-    field(:client_secret, String.t())
-    field(:code_verifier, String.t(), enforce: false)
+    field(:user_id, String.t(), enforce: false)
+    field(:nonce, String.t(), enforce: false)
   end
 
   @spec serialize(t) :: RequestApi.serialized_request()
@@ -24,7 +21,7 @@ defmodule Line.Request.Token do
   Serialize the Request into map
   """
   @impl true
-  def serialize(%Token{} = request) do
+  def serialize(%VerifyIdToken{} = request) do
     %{
       method: :post,
       endpoint: @endpoint,

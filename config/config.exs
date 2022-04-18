@@ -1,4 +1,6 @@
-use Mix.Config
+import Config
+
+config :ueberauth_line, Http.Client, client: Http.ClientHackney
 
 config :ueberauth,
        Ueberauth,

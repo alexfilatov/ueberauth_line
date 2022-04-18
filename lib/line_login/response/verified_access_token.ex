@@ -1,10 +1,10 @@
-defmodule Line.Response.VerifiedAccessToken do
+defmodule LineLogin.Response.VerifiedAccessToken do
   use TypedStruct
 
-  alias Http.ClientApi
-  alias Line.Response.VerifiedAccessToken
+  alias LmHttp.ClientAdapter
+  alias LineLogin.Response.VerifiedAccessToken
 
-  @behaviour Http.ResponseApi
+  @behaviour LmHttp.ResponseApi
 
   typedstruct do
     field(:scope, String.t())
@@ -12,7 +12,7 @@ defmodule Line.Response.VerifiedAccessToken do
     field(:expires_in, integer())
   end
 
-  @spec deserialize(ClientApi.response()) :: t
+  @spec deserialize(ClientAdapter.response()) :: t
   @impl true
   def deserialize(%{body: body}) when is_map(body) do
     body

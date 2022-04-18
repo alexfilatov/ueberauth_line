@@ -1,4 +1,4 @@
-defmodule Line.Api do
+defmodule LineLogin.Api do
   @moduledoc """
   This module provides an interface to interact with Line Login API v2.1
 
@@ -8,10 +8,9 @@ defmodule Line.Api do
   - friendship status
   """
 
-  alias Http.Client
-  alias Http.RequestApi
-  alias Line.Request.{VerifyIdToken, Token, VerifyAccessToken, GetProfile}
-  alias Line.Response.{Error, AccessToken, OpenId, VerifiedAccessToken, Profile}
+  alias LineLogin.Client
+  alias LineLogin.Request.{VerifyIdToken, Token, VerifyAccessToken, GetProfile}
+  alias LineLogin.Response.{Error, AccessToken, OpenId, VerifiedAccessToken, Profile}
 
   @spec issue_access_token(Token.t()) :: {:ok, AccessToken.t()} | {:error, Error.t()}
   def issue_access_token(%Token{} = request) do
@@ -47,10 +46,10 @@ defmodule Line.Api do
   end
 
   defp parse_response(%{status: status} = response, type) when status in [200] do
-    type.deserialize(response)
+    {:ok, type.deserialize(response)}
   end
 
-  defp parse_response(response, type) do
-    Error.deserialize(response)
+  defp parse_response(response, _type) do
+    {:error, Error.deserialize(response)}
   end
 end

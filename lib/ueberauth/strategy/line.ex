@@ -13,21 +13,25 @@ defmodule Ueberauth.Strategy.Line do
   alias Ueberauth.Auth.Info
   alias Ueberauth.Auth.Credentials
   alias Ueberauth.Auth.Extra
+  alias LineLogin.Api, as: LineApi
+  alias LineLogin.Response.{OpenId}
+  alias LineLogin.Request.VerifyIdToken
 
   @doc """
   Handles initial request for Line authentication.
   """
   def handle_request!(conn) do
     allowed_params = get_allowed_params(conn)
+    {conn, state} = generate_state(conn)
 
     authorize_url =
       conn.params
       |> filter_allowed_params(allowed_params)
       |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
       |> Keyword.put(:redirect_uri, callback_url(conn))
+      |> Keyword.put(:state, state)
       |> put_scope(conn)
-      |> generate_and_put_state()
-      |> Ueberauth.Strategy.Line.OAuth.authorize_url!()
+      |> Ueberauth.Strategy.LineLogin.OAuth.authorize_url!()
 
     redirect!(conn, authorize_url)
   end
@@ -54,26 +58,22 @@ defmodule Ueberauth.Strategy.Line do
     |> Enum.filter(fn {k, _v} -> Enum.member?(allowed_params, k) end)
   end
 
-  defp generate_and_put_state(params) do
-    state = generate_state()
+  defp verify_response_state(%Plug.Conn{params: %{"state" => state}} = conn)
+       when is_binary(state),
+       do: get_session(conn, :line_state) === state
 
-    Keyword.put(params, :state, state)
-  end
+  defp verify_response_state(_), do: false
 
-  @doc """
-  Handles the callback from Line.
-  """
-  def handle_callback!(
-        %Plug.Conn{
-          params: %{
-            "code" => code,
-            "state" => _
-          }
-        } = conn
-      ) do
+  defp handle_access_token(
+         %Plug.Conn{
+           params: %{
+             "code" => code
+           }
+         } = conn
+       ) do
     opts = [redirect_uri: callback_url(conn)]
 
-    get_token_result = Ueberauth.Strategy.Line.OAuth.get_token!([code: code], opts)
+    get_token_result = Ueberauth.Strategy.LineLogin.OAuth.get_token!([code: code], opts)
 
     case get_token_result do
       %OAuth2.AccessToken{access_token: nil, other_params: other_params} ->
@@ -81,11 +81,51 @@ defmodule Ueberauth.Strategy.Line do
         desc = other_params["error_description"]
         set_errors!(conn, [error(err, desc)])
 
-      #      client ->
-      #        try_fetch_user(conn, client)
       client ->
         verify_id_token(conn, client)
+        |> fetch_user_1(conn, client)
+
+        #        TODO: here handle error and use set_errors!(conn...)
     end
+  end
+
+  @doc """
+  Handles the callback from LineLogin.
+  """
+  def handle_callback!(
+        %Plug.Conn{
+          params: %{
+            "code" => code
+          }
+        } = conn
+      ) do
+    #    TODO: verify code
+    case verify_response_state(conn) do
+      true -> aa(conn)
+      _ -> set_errors!(conn, [error("invalid_state", "Invalid response state")])
+    end
+  end
+
+  defp aa(conn) do
+    conn
+    |> handle_access_token()
+  end
+
+  #  TODO: check for existence of the optional fields like picture and email
+  defp fetch_user_1({:ok, %OpenId{name: name, email: email, picture: picture}}, conn, client) do
+    conn = put_private(conn, :line_token, client.token)
+
+    user = %{
+      name: name,
+      email: email,
+      picture: picture
+    }
+
+    put_private(conn, :line_user, user)
+  end
+
+  defp fetch_user_1({:error, body}, conn, _) do
+    set_errors!(conn, [error("invalid_response", body)])
   end
 
   @doc false
@@ -96,6 +136,8 @@ defmodule Ueberauth.Strategy.Line do
   @doc false
   def handle_cleanup!(conn) do
     conn
+    |> put_session(:line_state, nil)
+    |> put_session(:line_nonce, nil)
     |> put_private(:line_user, nil)
     |> put_private(:line_token, nil)
   end
@@ -154,102 +196,23 @@ defmodule Ueberauth.Strategy.Line do
     }
   end
 
-  # TODO: Implement this
-  defp fetch_image(image_url) do
-    image_url
-  end
-
-  defp is_token_valid?(%{client_id: client_id}, %{client_id: client_id, expires_in: expires_in})
-       when expires_in > 0,
-       do: true
-
-  defp is_token_valid?(_client, _response), do: false
-
-  defp validate_token_response(conn, client, body) do
-    case is_token_valid?(client, body) do
-      true ->
-        {:ok, client}
-
-      _ ->
-        {:error, "invalid token"}
-    end
-  end
-
-  defp validate_token(conn, %{token: token} = client) do
-    url = "https://api.line.me/oauth2/v2.1/verify"
-
-    response = OAuth2.Client.get(client, url)
-
-    case response do
-      {:ok, %OAuth2.Response{status_code: 200, body: body}} ->
-        validate_token_response(conn, client, body)
-
-      {:error, %OAuth2.Error{reason: reason}} ->
-        {:error, reason}
-    end
-  end
-
   defp verify_id_token(conn, client) do
-    url = "https://api.line.me/oauth2/v2.1/verify"
-
     %{client_id: client_id, id_token: id_token} = client
+    {conn, nonce} = generate_nonce(conn)
 
-    params = %{
-      # nonce: nonce,
-      client_id: client_id,
-      id_token: id_token
-    }
-
-    response = OAuth2.Client.post(client, url, params)
-
-    case response do
-      {:ok, %OAuth2.Response{status_code: 200, body: body}} ->
-        convert_user(conn, body)
-        |> put_private(:line_token, client.token)
-
-      {:error, %OAuth2.Error{reason: reason}} ->
-        {:error, reason}
-    end
-  end
-
-  defp convert_user(conn, %{email: email, name: name, picture: picture}) do
-    #    TODO: test against specified scope:
-    #    Not included if the profile scope wasn't specified in the authorization request.
-    user = %{
-      email: email,
-      name: name,
-      picture: picture
-    }
-
-    put_private(conn, :line_user, user)
-  end
-
-  defp try_fetch_user(conn, client) do
-    case validate_token(conn, client) do
-      {:ok, client} ->
-        fetch_user(conn, client)
-
-      {:error, reason} ->
-        set_errors!(conn, [error("OAuth2", reason)])
-    end
-  end
-
-  defp fetch_user(conn, client) do
-    conn = put_private(conn, :line_token, client.token)
-    url = "https://api.line.me/v2/profile"
-
-    response = OAuth2.Client.get(client, url)
+    response =
+      %VerifyIdToken{
+        id_token: id_token,
+        client_id: client_id,
+        nonce: nonce
+        #    user_id: user_id
+      }
+      |> LineApi.verify_id_token()
 
     case response do
-      {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
-        set_errors!(conn, [error("token", "unauthorized")])
-
-      {:ok, %OAuth2.Response{status_code: status_code, body: user}}
-      when status_code in 200..399 ->
-        put_private(conn, :line_user, user)
-
-      {:error, %OAuth2.Error{reason: reason}} ->
-        set_errors!(conn, [error("OAuth2", reason)])
+      #      TODO: verify nonce
+      {:ok, %OpenId{nonce: nonce}} = result -> result
+      {:error, %{status: status, body: body}} -> {:error, body}
     end
   end
 
@@ -263,11 +226,14 @@ defmodule Ueberauth.Strategy.Line do
     |> Keyword.get(key, default)
   end
 
-  defp generate_state do
-    StringGenerator.generate_string(10)
+  defp generate_state(conn) do
+    state = StringGenerator.generate_string(10)
+
+    {put_session(conn, :line_state, state), state}
   end
 
-  defp generate_nonce do
-    StringGenerator.generate_string(8)
+  defp generate_nonce(conn) do
+    nonce = StringGenerator.generate_string(8)
+    {put_session(conn, :line_nonce, nonce), nonce}
   end
 end

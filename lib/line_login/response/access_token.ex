@@ -1,10 +1,10 @@
-defmodule Line.Response.AccessToken do
+defmodule LineLogin.Response.AccessToken do
   use TypedStruct
 
-  alias Http.ClientApi
-  alias Line.Response.AccessToken
+  alias LmHttp.ClientAdapter
+  alias LineLogin.Response.AccessToken
 
-  @behaviour Http.ResponseApi
+  @behaviour LmHttp.ResponseApi
 
   typedstruct do
     field(:access_token, String.t())
@@ -15,7 +15,7 @@ defmodule Line.Response.AccessToken do
     field(:token_type, String.t())
   end
 
-  @spec deserialize(ClientApi.response()) :: t
+  @spec deserialize(ClientAdapter.response()) :: t
   @impl true
   def deserialize(%{body: body}) when is_map(body) do
     body

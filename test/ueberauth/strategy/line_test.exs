@@ -1,25 +1,45 @@
 defmodule Ueberauth.Strategy.LineTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   use Plug.Test
 
   import Mock
   import Plug.Conn
   import Ueberauth.Strategy.Helpers
 
-  #  https://developers.line.biz/en/reference/line-login/#issue-token-http-request
-  # POST
-  @api_issue_token "https://api.line.me/oauth2/v2.1/token"
-  #  Verify uses GET to verify access token and POST to verify ID token
-  @api_verify_token "https://api.line.me/oauth2/v2.1/verify"
-  # POST
-  @api_revoke_token "https://api.line.me/oauth2/v2.1/revoke"
-  #  GET
-  @api_profile "https://api.line.me/v2/profile"
+  alias LineLogin.Client
 
-  #  Collect sample responses for each endpoint
+  @api_verify_token "https://api.line.me/oauth2/v2.1/verify"
+  @api_profile "https://api.line.me/v2/profile"
 
   @url_auth "/auth/line"
   @url_callback "/auth/line/callback"
+
+  def client_request(%{
+        method: :post,
+        endpoint: "https://api.line.me/oauth2/v2.1/verify",
+        headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+        body: %{
+          "id_token" => "success_id_token",
+          "client_id" => "randomClientId1234",
+          "nonce" => nonce
+        }
+      }) do
+    LineLogin.ApiTestHelper.response(
+      200,
+      %{
+        "iss" => "https://access.line.me",
+        "sub" => "U1234567890abcdef1234567890abcdef",
+        "aud" => "1234567890",
+        "exp" => 1_504_169_092,
+        "iat" => 1_504_263_657,
+        "amr" => ["pwd"],
+        "email" => "john.wick@example.com",
+        "picture" => "https://sample_line.me/aBcdefg123456",
+        "name" => "John Wick",
+        "nonce" => nonce
+      }
+    )
+  end
 
   setup_with_mocks([
     {OAuth2.Client, [:passthrough],
@@ -27,11 +47,24 @@ defmodule Ueberauth.Strategy.LineTest do
        get_token!: &oauth2_get_token!/2,
        get: &oauth2_get/2,
        post: &oauth2_post/3
-     ]}
+     ]},
+    {
+      Client,
+      [:passthrough],
+      [
+        request: &client_request/1
+      ]
+    }
   ]) do
+    #    Code.require_file("test/http/client_mock.exs")
     # Create a connection with Ueberauth's CSRF cookies so they can be recycled during tests
     routes = Ueberauth.init([])
-    csrf_conn = conn(:get, @url_auth, %{}) |> Ueberauth.call(routes)
+
+    csrf_conn =
+      conn(:get, @url_auth, %{})
+      |> Plug.Test.init_test_session(%{line_state: "TEST-state"})
+      |> Ueberauth.call(routes)
+
     csrf_state = with_state_param([], csrf_conn) |> Keyword.get(:state)
 
     {:ok, csrf_conn: csrf_conn, csrf_state: csrf_state}
@@ -103,7 +136,9 @@ defmodule Ueberauth.Strategy.LineTest do
   end
 
   test "handle_request! redirects to appropriate auth uri" do
-    conn = conn(:get, @url_auth, %{})
+    conn =
+      conn(:get, @url_auth, %{})
+      |> init_test_session(%{})
 
     routes =
       Ueberauth.init()
@@ -130,9 +165,12 @@ defmodule Ueberauth.Strategy.LineTest do
     csrf_state: csrf_state,
     csrf_conn: csrf_conn
   } do
+    #    TODO: mock response
     conn =
       conn(:get, @url_callback, %{code: "success_code", state: csrf_state})
       |> set_csrf_cookies(csrf_conn)
+      #      TODO: here line_state is not set for the plug
+      |> init_test_session(%{line_state: csrf_state})
 
     #      TODO: get idToken and use it to retrieve user details
     #      TODO: add token verify request, because then response will match expected pattern
@@ -143,8 +181,11 @@ defmodule Ueberauth.Strategy.LineTest do
     assert auth.info.email == "john.wick@example.com"
   end
 
+  #  TODO: fetch session to store the cookie and remove nonce server(s)
   test "state param is present in the redirect uri" do
-    conn = conn(:get, @url_auth, %{})
+    conn =
+      conn(:get, @url_auth, %{})
+      |> Plug.Test.init_test_session(%{line_state: "TEST-state"})
 
     routes = Ueberauth.init()
     resp = Ueberauth.call(conn, routes)

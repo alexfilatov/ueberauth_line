@@ -1,14 +1,14 @@
-defmodule Line.Api.VerifyAccessTokenTest do
+defmodule LineLogin.Api.VerifyAccessTokenTest do
   use ExUnit.Case, async: false
   use Plug.Test
 
   import Mock
-  import Line.ApiTestHelper, only: [response: 3, response: 2]
+  import LineLogin.ApiTestHelper, only: [response: 2]
 
-  alias Line.Api, as: LineApi
-  alias Http.Client
-  alias Line.Request.{VerifyAccessToken}
-  alias Line.Response.{Error, VerifiedAccessToken}
+  alias LineLogin.Api, as: LineApi
+  alias LineLogin.Client
+  alias LineLogin.Request.{VerifyAccessToken}
+  alias LineLogin.Response.{Error, VerifiedAccessToken}
 
   describe "given Line Api verify_access_token" do
     setup_with_mocks([
@@ -61,11 +61,12 @@ defmodule Line.Api.VerifyAccessTokenTest do
         access_token: "abcd123123"
       }
 
-      assert %VerifiedAccessToken{
-               scope: "profile",
-               client_id: "1440057261",
-               expires_in: 2_591_659
-             } = LineApi.verify_access_token(request)
+      assert {:ok,
+              %VerifiedAccessToken{
+                scope: "profile",
+                client_id: "1440057261",
+                expires_in: 2_591_659
+              }} = LineApi.verify_access_token(request)
     end
 
     test "it returns error for invalid access_token" do
@@ -73,7 +74,7 @@ defmodule Line.Api.VerifyAccessTokenTest do
         access_token: "invalid"
       }
 
-      assert %Error{} = LineApi.verify_access_token(request)
+      assert {:error, %Error{}} = LineApi.verify_access_token(request)
     end
   end
 end

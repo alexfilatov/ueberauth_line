@@ -19,7 +19,17 @@ defmodule UeberauthLine.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :oauth2, :ueberauth, :typed_struct, :mappable]]
+    [
+      applications: [
+        :logger,
+        :oauth2,
+        :ueberauth,
+        :typed_struct,
+        :mappable,
+        :lm_http,
+        :lm_http_hackney
+      ]
+    ]
   end
 
   # Specifies which paths to compile per environment.
@@ -30,11 +40,14 @@ defmodule UeberauthLine.Mixfile do
     [
       {:ueberauth, "~> 0.4"},
       {:oauth2, "~> 2.0"},
+      {:lm_http, "~> 0.2"},
+      {:lm_http_hackney, "~> 0.1"},
       {:typed_struct, "~> 0.2.1"},
       {:mappable, "~> 0.2.0"},
       {:ex_doc, "~> 0.1", only: :dev},
       {:earmark, ">= 0.0.0", only: :dev},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:mock, "~> 0.3", only: :test},
       {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
       {:floki, ">= 0.30.0", only: :test}
@@ -56,7 +69,7 @@ defmodule UeberauthLine.Mixfile do
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "LICENSE"],
-      maintainers: ["Alex Filatov"],
+      maintainers: ["Alex Filatov", "Matt Chad"],
       licenses: ["MIT"],
       links: %{
         "GitHub" => "https://github.com/alexfilatov/ueberauth_line",

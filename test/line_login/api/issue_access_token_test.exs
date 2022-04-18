@@ -1,14 +1,14 @@
-defmodule Line.Api.IssueAccessTokenTest do
+defmodule LineLogin.Api.IssueAccessTokenTest do
   use ExUnit.Case, async: false
   use Plug.Test
 
   import Mock
-  import Line.ApiTestHelper, only: [response: 3, response: 2]
+  import LineLogin.ApiTestHelper, only: [response: 2]
 
-  alias Line.Api, as: LineApi
-  alias Http.Client
-  alias Line.Request.{VerifyIdToken, Token}
-  alias Line.Response.{Error, AccessToken, OpenId}
+  alias LineLogin.Api, as: LineApi
+  alias LineLogin.Client
+  alias LineLogin.Request.{Token}
+  alias LineLogin.Response.{Error, AccessToken}
 
   describe "given Line Api issue_access_token" do
     setup_with_mocks([
@@ -67,14 +67,15 @@ defmodule Line.Api.IssueAccessTokenTest do
         code_verifier: "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
       }
 
-      assert %AccessToken{
-               access_token: "bNl4YEFPI/hjFWhTqexp4MuEw5YPs",
-               expires_in: 2_592_000,
-               id_token: "eyJhbGciOiJIUzI1NiJ9",
-               refresh_token: "Aa1FdeggRhTnPNNpxr8p",
-               scope: "profile",
-               token_type: "Bearer"
-             } = LineApi.issue_access_token(request)
+      assert {:ok,
+              %AccessToken{
+                access_token: "bNl4YEFPI/hjFWhTqexp4MuEw5YPs",
+                expires_in: 2_592_000,
+                id_token: "eyJhbGciOiJIUzI1NiJ9",
+                refresh_token: "Aa1FdeggRhTnPNNpxr8p",
+                scope: "profile",
+                token_type: "Bearer"
+              }} = LineApi.issue_access_token(request)
     end
 
     test "it returns error for invalid credentials" do
@@ -87,7 +88,7 @@ defmodule Line.Api.IssueAccessTokenTest do
         code_verifier: "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
       }
 
-      assert %Error{} = LineApi.issue_access_token(request)
+      assert {:error, %Error{}} = LineApi.issue_access_token(request)
     end
   end
 end

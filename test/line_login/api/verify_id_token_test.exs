@@ -1,14 +1,14 @@
-defmodule Line.Api.VerifyIdTokenTest do
+defmodule LineLogin.Api.VerifyIdTokenTest do
   use ExUnit.Case, async: false
   use Plug.Test
 
   import Mock
-  import Line.ApiTestHelper, only: [response: 3, response: 2]
+  import LineLogin.ApiTestHelper, only: [response: 2]
 
-  alias Line.Api, as: LineApi
-  alias Http.Client
-  alias Line.Request.{VerifyIdToken}
-  alias Line.Response.{Error, OpenId}
+  alias LineLogin.Api, as: LineApi
+  alias LineLogin.Client
+  alias LineLogin.Request.{VerifyIdToken}
+  alias LineLogin.Response.{Error, OpenId}
 
   describe "given Line Api verify_id_token" do
     setup_with_mocks([
@@ -96,18 +96,19 @@ defmodule Line.Api.VerifyIdTokenTest do
         user_id: "qweqwe"
       }
 
-      assert %OpenId{
-               iss: "https://access.line.me",
-               sub: "U1234567890abcdef1234567890abcdef",
-               aud: "1234567890",
-               exp: 1_504_169_092,
-               iat: 1_504_263_657,
-               nonce: "0987654asdf",
-               amr: ["pwd"],
-               name: "Taro Line",
-               picture: "https://sample_line.me/aBcdefg123456",
-               email: "taro.line@example.com"
-             } = LineApi.verify_id_token(request)
+      assert {:ok,
+              %OpenId{
+                iss: "https://access.line.me",
+                sub: "U1234567890abcdef1234567890abcdef",
+                aud: "1234567890",
+                exp: 1_504_169_092,
+                iat: 1_504_263_657,
+                nonce: "0987654asdf",
+                amr: ["pwd"],
+                name: "Taro Line",
+                picture: "https://sample_line.me/aBcdefg123456",
+                email: "taro.line@example.com"
+              }} = LineApi.verify_id_token(request)
     end
 
     test "it returns OpenId verification without optional fields" do
@@ -116,14 +117,15 @@ defmodule Line.Api.VerifyIdTokenTest do
         client_id: "qwqwe"
       }
 
-      assert %OpenId{
-               iss: "https://access.line.me",
-               sub: "U1234567890abcdef1234567890abcdef",
-               aud: "1234567890",
-               exp: 1_504_169_092,
-               iat: 1_504_263_657,
-               amr: ["pwd"]
-             } = LineApi.verify_id_token(request)
+      assert {:ok,
+              %OpenId{
+                iss: "https://access.line.me",
+                sub: "U1234567890abcdef1234567890abcdef",
+                aud: "1234567890",
+                exp: 1_504_169_092,
+                iat: 1_504_263_657,
+                amr: ["pwd"]
+              }} = LineApi.verify_id_token(request)
     end
 
     test "it returns error with invalid credentials" do
@@ -134,7 +136,7 @@ defmodule Line.Api.VerifyIdTokenTest do
         user_id: "qweqwe"
       }
 
-      assert %Error{} = LineApi.verify_id_token(request)
+      assert {:error, %Error{}} = LineApi.verify_id_token(request)
     end
   end
 end

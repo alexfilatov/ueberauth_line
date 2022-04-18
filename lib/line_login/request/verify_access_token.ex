@@ -1,9 +1,9 @@
-defmodule Line.Request.VerifyAccessToken do
+defmodule LineLogin.Request.VerifyAccessToken do
   use TypedStruct
 
-  alias Http.RequestApi
-  alias Line.Request.VerifyAccessToken
-  alias Http.RequestApi
+  alias LmHttp.RequestApi
+  alias LineLogin.Request.VerifyAccessToken
+  alias LmHttp.RequestApi
 
   @behaviour RequestApi
 
