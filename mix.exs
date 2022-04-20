@@ -40,7 +40,7 @@ defmodule UeberauthLine.Mixfile do
     [
       {:ueberauth, "~> 0.4"},
       {:oauth2, "~> 2.0"},
-      {:lm_http, "~> 0.2"},
+      {:lm_http, "~> 0.3"},
       {:lm_http_hackney, "~> 0.1"},
       {:typed_struct, "~> 0.2.1"},
       {:mappable, "~> 0.2.0"},
