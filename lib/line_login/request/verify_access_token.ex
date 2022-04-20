@@ -22,7 +22,7 @@ defmodule LineLogin.Request.VerifyAccessToken do
     %{
       method: :get,
       endpoint: @endpoint,
-      headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+      headers: [{"Content-Type", "application/x-www-form-urlencoded"}],
       body: Mappable.to_map(request, keys: :strings)
     }
   end

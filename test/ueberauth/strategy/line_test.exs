@@ -56,7 +56,6 @@ defmodule Ueberauth.Strategy.LineTest do
       ]
     }
   ]) do
-    #    Code.require_file("test/http/client_mock.exs")
     # Create a connection with Ueberauth's CSRF cookies so they can be recycled during tests
     routes = Ueberauth.init([])
 
@@ -84,7 +83,10 @@ defmodule Ueberauth.Strategy.LineTest do
   defp response(body, code \\ 200), do: {:ok, %OAuth2.Response{status_code: code, body: body}}
 
   def oauth2_get_token!(client, code: "success_code") do
-    token(client, "success_token")
+    token(
+      client,
+      "{\"access_token\":\"TEST_ACCESS_TOKEN\",\"token_type\":\"Bearer\",\"refresh_token\":\"TEST_REFRESH_TOKEN\",\"expires_in\":2592000,\"scope\":\"openid profile\",\"id_token\":\"success_id_token\"}"
+    )
     |> Map.put(:id_token, "success_id_token")
   end
 
@@ -165,23 +167,21 @@ defmodule Ueberauth.Strategy.LineTest do
     csrf_state: csrf_state,
     csrf_conn: csrf_conn
   } do
-    #    TODO: mock response
     conn =
       conn(:get, @url_callback, %{code: "success_code", state: csrf_state})
+      |> put_private(:line_state, csrf_state)
       |> set_csrf_cookies(csrf_conn)
-      #      TODO: here line_state is not set for the plug
-      |> init_test_session(%{line_state: csrf_state})
 
-    #      TODO: get idToken and use it to retrieve user details
-    #      TODO: add token verify request, because then response will match expected pattern
     routes = Ueberauth.init([])
     assert %Plug.Conn{assigns: %{ueberauth_auth: auth}} = Ueberauth.call(conn, routes)
-    assert auth.credentials.token == "success_token"
+
+    assert auth.credentials.token ==
+             "{\"access_token\":\"TEST_ACCESS_TOKEN\",\"token_type\":\"Bearer\",\"refresh_token\":\"TEST_REFRESH_TOKEN\",\"expires_in\":2592000,\"scope\":\"openid profile\",\"id_token\":\"success_id_token\"}"
+
     assert auth.info.name == "John Wick"
     assert auth.info.email == "john.wick@example.com"
   end
 
-  #  TODO: fetch session to store the cookie and remove nonce server(s)
   test "state param is present in the redirect uri" do
     conn =
       conn(:get, @url_auth, %{})

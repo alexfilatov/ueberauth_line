@@ -22,6 +22,7 @@ defmodule LineLogin.Request.GetProfile do
       method: :get,
       endpoint: @endpoint,
       headers: Mappable.to_map(request, keys: :strings)
+#      TODO: convert headers to Keyword, not map
     }
   end
 end

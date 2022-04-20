@@ -23,6 +23,7 @@ defmodule UeberauthLine.Mixfile do
       applications: [
         :logger,
         :oauth2,
+        :jason,
         :ueberauth,
         :typed_struct,
         :mappable,
@@ -40,8 +41,10 @@ defmodule UeberauthLine.Mixfile do
     [
       {:ueberauth, "~> 0.4"},
       {:oauth2, "~> 2.0"},
-      {:lm_http, "~> 0.3"},
-      {:lm_http_hackney, "~> 0.1"},
+      {:jason, "~> 1.0"},
+      {:lm_http, git: "https://github.com/LucidModules/elixir-http", branch: "master"},
+      {:lm_http_hackney,
+       git: "https://github.com/LucidModules/elixir-http-hackney", branch: "master"},
       {:typed_struct, "~> 0.2.1"},
       {:mappable, "~> 0.2.0"},
       {:ex_doc, "~> 0.1", only: :dev},

@@ -28,7 +28,7 @@ defmodule LineLogin.Request.Token do
     %{
       method: :post,
       endpoint: @endpoint,
-      headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+      headers: [{"Content-Type", "application/x-www-form-urlencoded"}],
       body: prepare_body(request)
     }
   end

@@ -25,7 +25,7 @@ defmodule LineLogin.Request.VerifyIdToken do
     %{
       method: :post,
       endpoint: @endpoint,
-      headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
+      headers: [{"Content-Type", "application/x-www-form-urlencoded"}],
       body: prepare_body(request)
     }
   end
@@ -34,5 +34,6 @@ defmodule LineLogin.Request.VerifyIdToken do
     request
     |> Mappable.to_map(keys: :strings)
     |> Payload.remove_nils()
+    |> Payload.to_keyword()
   end
 end

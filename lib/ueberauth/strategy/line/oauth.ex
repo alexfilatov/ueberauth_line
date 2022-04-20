@@ -1,4 +1,4 @@
-defmodule Ueberauth.Strategy.LineLogin.OAuth do
+defmodule Ueberauth.Strategy.Line.OAuth do
   @moduledoc """
   OAuth2 for Line.
 

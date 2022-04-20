@@ -6,7 +6,7 @@ config :ueberauth,
          line:
            {Ueberauth.Strategy.Line,
             [
-              default_scope: "profile%20email"
+              default_scope: "profile openid email"
             ]}
        ]
 
