@@ -2,76 +2,26 @@ defmodule LineLogin.Api.IssueAccessTokenTest do
   use ExUnit.Case, async: false
   use Plug.Test
 
-  import Mock
-  import LineLogin.ApiTestHelper, only: [response: 2]
-
   alias LineLogin.Api, as: LineApi
-  alias LineLogin.Client
   alias LineLogin.Request.{Token}
   alias LineLogin.Response.{Error, AccessToken}
 
   describe "given Line Api issue_access_token" do
-    setup_with_mocks([
-      {
-        Client,
-        [:passthrough],
-        [
-          request: &client_request/1
-        ]
-      }
-    ]) do
-      :ok
-    end
-
-    def client_request(%{
-          method: :post,
-          endpoint: "https://api.line.me/oauth2/v2.1/token",
-          headers: %{"Content-Type" => "application/x-www-form-urlencoded"},
-          body: %{"client_id" => "1234567890"}
-        }) do
-      response(
-        200,
-        %{
-          "access_token" => "bNl4YEFPI/hjFWhTqexp4MuEw5YPs",
-          "expires_in" => 2_592_000,
-          "id_token" => "eyJhbGciOiJIUzI1NiJ9",
-          "refresh_token" => "Aa1FdeggRhTnPNNpxr8p",
-          "scope" => "profile",
-          "token_type" => "Bearer"
-        }
-      )
-    end
-
-    def client_request(%{
-          method: :post,
-          endpoint: "https://api.line.me/oauth2/v2.1/token",
-          headers: _,
-          body: _
-        }) do
-      response(
-        400,
-        %{
-          "error" => "invalid_request",
-          "error_description" => "invalid clientId"
-        }
-      )
-    end
-
     test "it returns access token" do
       request = %Token{
         grant_type: "authorization_code",
-        code: "1234567890abcde",
+        code: "valid_code",
         redirect_uri: "https://example.com/auth?key=value",
-        client_id: "1234567890",
-        client_secret: "1234567890abcdefghij1234567890ab",
+        client_id: "client_id_valid",
+        client_secret: "client_secret_valid",
         code_verifier: "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
       }
 
       assert {:ok,
               %AccessToken{
-                access_token: "bNl4YEFPI/hjFWhTqexp4MuEw5YPs",
+                access_token: "access_token_valid",
                 expires_in: 2_592_000,
-                id_token: "eyJhbGciOiJIUzI1NiJ9",
+                id_token: "id_token_valid",
                 refresh_token: "Aa1FdeggRhTnPNNpxr8p",
                 scope: "profile",
                 token_type: "Bearer"

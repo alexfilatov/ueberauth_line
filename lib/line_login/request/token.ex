@@ -8,7 +8,7 @@ defmodule LineLogin.Request.Token do
 
   @behaviour RequestApi
 
-  @endpoint "https://api.line.me/oauth2/v2.1/token"
+  @endpoint "/oauth2/v2.1/token"
 
   typedstruct enforce: true do
     field(:grant_type, String.t())
@@ -17,6 +17,10 @@ defmodule LineLogin.Request.Token do
     field(:client_id, String.t())
     field(:client_secret, String.t())
     field(:code_verifier, String.t(), enforce: false)
+  end
+
+  def new(data) when is_map(data) do
+    struct!(Token, data)
   end
 
   @spec serialize(t) :: RequestApi.serialized_request()
@@ -37,5 +41,6 @@ defmodule LineLogin.Request.Token do
     request
     |> Mappable.to_map(keys: :strings)
     |> Payload.remove_nils()
+    |> Payload.to_keyword()
   end
 end

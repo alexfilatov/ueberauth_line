@@ -7,13 +7,17 @@ defmodule LineLogin.Request.VerifyIdToken do
 
   @behaviour RequestApi
 
-  @endpoint "https://api.line.me/oauth2/v2.1/verify"
+  @endpoint "/oauth2/v2.1/verify"
 
   typedstruct enforce: true do
     field(:id_token, String.t())
     field(:client_id, String.t())
     field(:user_id, String.t(), enforce: false)
     field(:nonce, String.t(), enforce: false)
+  end
+
+  def new(data) when is_map(data) do
+    struct!(VerifyIdToken, data)
   end
 
   @spec serialize(t) :: RequestApi.serialized_request()

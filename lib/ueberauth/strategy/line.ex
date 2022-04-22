@@ -14,8 +14,8 @@ defmodule Ueberauth.Strategy.Line do
   alias Ueberauth.Auth.Credentials
   alias Ueberauth.Auth.Extra
   alias LineLogin.Api, as: LineApi
-  alias LineLogin.Response.{OpenId}
-  alias LineLogin.Request.VerifyIdToken
+  alias LineLogin.Response.{AccessToken, OpenId, Error}
+  alias LineLogin.Request.{Token, VerifyIdToken}
 
   @doc """
   Handles initial request for Line authentication.
@@ -46,6 +46,20 @@ defmodule Ueberauth.Strategy.Line do
     Keyword.put(params, :scope, scope)
   end
 
+  defp get_config do
+    Application.get_env(:ueberauth, Ueberauth.Strategy.Line.OAuth)
+  end
+
+  # TODO: check field exists
+  defp get_credentials() do
+    config = get_config()
+
+    %{
+      client_id: config[:client_id],
+      client_secret: config[:client_secret]
+    }
+  end
+
   defp get_allowed_params(conn) do
     conn
     |> option(:allowed_request_params)
@@ -69,13 +83,50 @@ defmodule Ueberauth.Strategy.Line do
         } = conn
       )
       when is_binary(code) and is_binary(state) do
-    #    TODO: verify code
-    handle_access_token(conn)
+    #    TODO: verify code and state
+    #    handle_access_token(conn)
+    %{
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: callback_url(conn),
+      #    TODO: generate code and store in cookie
+      code_verifier: "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
+    }
+    |> Map.merge(get_credentials())
+    |> Token.new()
+    |> LineApi.issue_access_token()
+    |> verify_id_token(conn)
   end
 
   @doc false
   def handle_callback!(conn) do
     set_errors!(conn, [error("missing_code", "No code received")])
+  end
+
+  defp verify_id_token({:ok, %AccessToken{id_token: id_token} = token}, conn)
+       when is_binary(id_token) do
+    %{client_id: client_id} = get_credentials()
+
+    conn = put_private(conn, :line_token, token)
+
+    %VerifyIdToken{
+      id_token: id_token,
+      client_id: client_id
+      #    TODO: dynamic nonce
+      #      nonce: "zaq123456"
+    }
+    |> LineApi.verify_id_token()
+    |> fetch_user(conn)
+  end
+
+  defp verify_id_token({:error, %Error{error: error, error_description: error_desc}}, conn) do
+    set_errors!(conn, [error(error, error_desc)])
+  end
+
+  defp verify_id_token(response, conn) do
+    set_errors!(conn, [
+      error("missing_id_token", "No Id Token received. Response: " <> inspect(response))
+    ])
   end
 
   @doc false
@@ -87,54 +138,8 @@ defmodule Ueberauth.Strategy.Line do
     |> put_private(:line_token, nil)
   end
 
-  defp handle_access_token(
-         %Plug.Conn{
-           params: %{
-             "code" => code
-           }
-         } = conn
-       ) do
-    opts = [redirect_uri: callback_url(conn)]
-
-    get_token_result = Ueberauth.Strategy.Line.OAuth.get_token!([code: code], opts)
-
-    case get_token_result do
-      %OAuth2.AccessToken{access_token: nil, other_params: other_params} ->
-        err = other_params["error"]
-        desc = other_params["error_description"]
-        set_errors!(conn, [error(err, desc)])
-
-      client ->
-        verify_id_token(conn, client)
-        |> fetch_user(conn, client)
-    end
-  end
-
-  defp verify_id_token(conn, %OAuth2.Client{
-         client_id: client_id,
-         token: %OAuth2.AccessToken{access_token: access_token}
-       }) do
-    {:ok, %{"id_token" => id_token}} = Jason.decode(access_token)
-    {_conn, nonce} = generate_nonce(conn)
-
-    response =
-      %VerifyIdToken{
-        id_token: id_token,
-        client_id: client_id,
-        nonce: nonce
-        #    user_id: user_id
-      }
-      |> LineApi.verify_id_token()
-
-    case response do
-      #      TODO: verify nonce
-      {:ok, %OpenId{nonce: _nonce}} = result -> result
-      {:error, %{status: _status, body: body}} -> {:error, body}
-    end
-  end
-
   #  TODO: check for existence of the optional fields like picture and email
-  defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture}}, conn, client) do
+  defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture}}, conn) do
     user = %{
       name: name,
       email: email,
@@ -142,47 +147,50 @@ defmodule Ueberauth.Strategy.Line do
     }
 
     conn
-    |> put_private(:line_token, client.token)
     |> put_private(:line_user, user)
   end
 
-  defp fetch_user({:error, body}, conn, _) do
-    set_errors!(conn, [error("invalid_response", body)])
+  defp fetch_user(response, conn) do
+    set_errors!(conn, [error("invalid_response", inspect(response))])
   end
 
   @doc """
   Fetches the uid field from the response.
   """
-  def uid(conn) do
+  def uid(%{private: %{line_user: user}} = conn) do
     uid_field =
       conn
       |> option(:uid_field)
       |> to_string
 
-    conn.private.line_user[uid_field]
+    user[uid_field]
+  end
+
+  def uid(conn) do
+    set_errors!(conn, [error("invalid_struct", "Cannot fetch uid")])
   end
 
   @doc """
   Includes the credentials from the line response.
   """
-  def credentials(conn) do
-    token = conn.private.line_token
-
+  def credentials(%{private: %{line_token: token}}) do
     %Credentials{
-      expires: !!token.expires_at,
-      expires_at: token.expires_at,
+      expires: !!token.expires_in,
+      expires_at: token.expires_in,
       scopes: [],
       token: token.access_token
     }
+  end
+
+  def credentials(conn) do
+    set_errors!(conn, [error("invalid_struct", "Cannot fetch credentials")])
   end
 
   @doc """
   Fetches the fields to populate the info section of the
   `Ueberauth.Auth` struct.
   """
-  def info(conn) do
-    user = conn.private.line_user
-
+  def info(%{private: %{line_user: user}}) do
     %Info{
       email: user.email,
       first_name: user.name,
@@ -191,17 +199,25 @@ defmodule Ueberauth.Strategy.Line do
     }
   end
 
+  def info(conn) do
+    set_errors!(conn, [error("invalid_struct", "Cannot fetch info")])
+  end
+
   @doc """
   Stores the raw information (including the token) obtained from
   the line callback.
   """
-  def extra(conn) do
+  def extra(%{private: %{line_token: token, line_user: user}}) do
     %Extra{
       raw_info: %{
-        token: conn.private.line_token,
-        user: conn.private.line_user
+        token: token,
+        user: user
       }
     }
+  end
+
+  def extra(conn) do
+    set_errors!(conn, [error("invalid_struct", "Cannot fetch extra")])
   end
 
   defp option(conn, key) do

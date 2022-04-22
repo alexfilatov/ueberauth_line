@@ -4,13 +4,18 @@ defmodule LineLogin.Request.VerifyAccessToken do
   alias LmHttp.RequestApi
   alias LineLogin.Request.VerifyAccessToken
   alias LmHttp.RequestApi
+  alias LmHttp.Payload
 
   @behaviour RequestApi
 
-  @endpoint "https://api.line.me/oauth2/v2.1/verify"
+  @endpoint "/oauth2/v2.1/verify"
 
   typedstruct enforce: true do
     field(:access_token, String.t())
+  end
+
+  def new(data) when is_map(data) do
+    struct!(VerifyAccessToken, data)
   end
 
   @spec serialize(t) :: RequestApi.serialized_request()
@@ -21,9 +26,8 @@ defmodule LineLogin.Request.VerifyAccessToken do
   def serialize(%VerifyAccessToken{} = request) do
     %{
       method: :get,
-      endpoint: @endpoint,
-      headers: [{"Content-Type", "application/x-www-form-urlencoded"}],
-      body: Mappable.to_map(request, keys: :strings)
+      endpoint: @endpoint <> "?access_token=#{request.access_token}",
+      headers: [{"Content-Type", "application/x-www-form-urlencoded"}]
     }
   end
 end

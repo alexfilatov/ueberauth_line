@@ -20,16 +20,23 @@ defmodule UeberauthLine.Mixfile do
 
   def application do
     [
-      applications: [
-        :logger,
-        :oauth2,
-        :jason,
-        :ueberauth,
-        :typed_struct,
-        :mappable,
-        :lm_http,
-        :lm_http_hackney
-      ]
+      mod: {LineLogin.Application, [env: Mix.env()]},
+      applications: applications(Mix.env())
+    ]
+  end
+
+  defp applications(:test), do: applications(:default) ++ [:cowboy, :plug]
+
+  defp applications(_) do
+    [
+      :logger,
+      :oauth2,
+      :jason,
+      :ueberauth,
+      :typed_struct,
+      :mappable,
+      :lm_http,
+      :httpoison
     ]
   end
 
@@ -43,15 +50,15 @@ defmodule UeberauthLine.Mixfile do
       {:oauth2, "~> 2.0"},
       {:jason, "~> 1.0"},
       {:lm_http, git: "https://github.com/LucidModules/elixir-http", branch: "master"},
-      {:lm_http_hackney,
-       git: "https://github.com/LucidModules/elixir-http-hackney", branch: "master"},
       {:typed_struct, "~> 0.2.1"},
       {:mappable, "~> 0.2.0"},
       {:ex_doc, "~> 0.1", only: :dev},
       {:earmark, ">= 0.0.0", only: :dev},
       {:credo, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:mock, "~> 0.3", only: :test},
+      {:httpoison, "~> 1.0"},
+      # for testing requests
+      {:plug_cowboy, "~> 2.0"},
       {:mix_test_watch, "~> 0.8", only: :dev, runtime: false},
       {:floki, ">= 0.30.0", only: :test}
     ]
