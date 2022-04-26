@@ -30,7 +30,6 @@ defmodule UeberauthLine.Mixfile do
   defp applications(_) do
     [
       :logger,
-      :oauth2,
       :jason,
       :ueberauth,
       :typed_struct,
@@ -47,7 +46,6 @@ defmodule UeberauthLine.Mixfile do
   defp deps do
     [
       {:ueberauth, "~> 0.4"},
-      {:oauth2, "~> 2.0"},
       {:jason, "~> 1.0"},
       {:lm_http, git: "https://github.com/LucidModules/elixir-http", branch: "master"},
       {:typed_struct, "~> 0.2.1"},
@@ -76,6 +74,7 @@ defmodule UeberauthLine.Mixfile do
     "An Uberauth strategy for LINE authentication."
   end
 
+  # TODO: update details of the forked repo
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "LICENSE"],

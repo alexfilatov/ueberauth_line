@@ -106,7 +106,7 @@ defmodule LineLogin.MockServer do
         "redirect_uri" => _,
         "client_id" => "client_id_valid",
         "client_secret" => "client_secret_valid",
-        "code_verifier" => "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
+        "code_verifier" => _code_verifier
       } ->
         token_success(conn)
 

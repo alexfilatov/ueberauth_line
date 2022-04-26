@@ -13,32 +13,61 @@ defmodule Ueberauth.Strategy.Line do
   alias Ueberauth.Auth.Info
   alias Ueberauth.Auth.Credentials
   alias Ueberauth.Auth.Extra
+  alias LineLogin.Crypto.StringGenerator
+  alias LineLogin.Crypto.CodeChallenge
   alias LineLogin.Api, as: LineApi
   alias LineLogin.Response.{AccessToken, OpenId, Error}
-  alias LineLogin.Request.{Token, VerifyIdToken}
+  alias LineLogin.Request.{Authorize, Token, VerifyIdToken}
+  alias LineLogin.OAuth
+
+  @line_authorize_host "https://access.line.me"
+  @code_verifier_cookie "ueberauth.line_code_verifier"
 
   @doc """
   Handles initial request for Line authentication.
   """
   def handle_request!(conn) do
-    allowed_params = get_allowed_params(conn)
+    nonce = StringGenerator.generate_string(8)
 
-    authorize_url =
-      conn.params
-      |> filter_allowed_params(allowed_params)
-      |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
-      |> Keyword.put(:redirect_uri, callback_url(conn))
+    #    TODO: keep nonce in the ets or mnesia because it can't be passed in the cookies. This wouldn't prevent repeated attacks
+    # encrypt the nonce with aproppriate sha256
+    # set nonce time validity to few minutes (perhaps mnesia can do that)
+
+    code_verifier = CodeChallenge.generate_code_verifier()
+
+    authorize_request =
+      [
+        response_type: "code"
+      ]
+      |> put_client_id()
+      |> put_redirect_uri(conn)
       |> put_scope(conn)
+      |> put_code_challenge(code_verifier)
       |> with_state_param(conn)
-      |> Ueberauth.Strategy.Line.OAuth.authorize_url!()
+      #      |> with_nonce_param(conn)
+      |> Authorize.new()
 
-    redirect!(conn, authorize_url)
-  end
+    authorize_url = OAuth.get_authorize_url(@line_authorize_host, authorize_request)
 
-  defp get_scope(conn) do
     conn
-    |> option(:default_scope)
+    |> put_resp_cookie(@code_verifier_cookie, code_verifier, same_site: "Lax")
+    |> redirect!(authorize_url)
   end
+
+  defp put_code_challenge(params, code_verifier) do
+    %{
+      code_challenge: code_challenge,
+      code_challenge_method: code_challenge_method
+    } = CodeChallenge.get_code_challenge(code_verifier)
+
+    params
+    |> Keyword.put(:code_challenge, code_challenge)
+    |> Keyword.put(:code_challenge_method, code_challenge_method)
+  end
+
+  defp put_redirect_uri(params, conn), do: Keyword.put(params, :redirect_uri, callback_url(conn))
+
+  defp get_scope(conn), do: option(conn, :default_scope)
 
   defp put_scope(params, conn) do
     scope = get_scope(conn)
@@ -46,9 +75,13 @@ defmodule Ueberauth.Strategy.Line do
     Keyword.put(params, :scope, scope)
   end
 
-  defp get_config do
-    Application.get_env(:ueberauth, Ueberauth.Strategy.Line.OAuth)
+  defp put_client_id(params) do
+    %{client_id: client_id} = get_credentials()
+
+    Keyword.put(params, :client_id, client_id)
   end
+
+  defp get_config, do: Application.get_env(:ueberauth, Ueberauth.Strategy.Line.OAuth)
 
   # TODO: check field exists
   defp get_credentials() do
@@ -60,16 +93,8 @@ defmodule Ueberauth.Strategy.Line do
     }
   end
 
-  defp get_allowed_params(conn) do
-    conn
-    |> option(:allowed_request_params)
-    |> Enum.map(&to_string/1)
-  end
-
-  defp filter_allowed_params(params, allowed_params) do
-    params
-    |> Enum.filter(fn {k, _v} -> Enum.member?(allowed_params, k) end)
-  end
+  #  TODO: extract to separate module to ease validation
+  # also build connection should be extracted
 
   @doc """
   Handles the callback from Line.
@@ -79,18 +104,18 @@ defmodule Ueberauth.Strategy.Line do
           params: %{
             "code" => code,
             "state" => state
+          },
+          req_cookies: %{
+            "ueberauth.state_param" => state
           }
         } = conn
       )
       when is_binary(code) and is_binary(state) do
-    #    TODO: verify code and state
-    #    handle_access_token(conn)
     %{
       grant_type: "authorization_code",
       code: code,
       redirect_uri: callback_url(conn),
-      #    TODO: generate code and store in cookie
-      code_verifier: "wJKN8qz5t8SSI9lMFhBB6qwNkQBkuPZoCxzRhwLRUo1"
+      code_verifier: fetch_code_verifier!(conn)
     }
     |> Map.merge(get_credentials())
     |> Token.new()
@@ -98,9 +123,34 @@ defmodule Ueberauth.Strategy.Line do
     |> verify_id_token(conn)
   end
 
+  def handle_callback!(
+        %Plug.Conn{
+          params: %{
+            "code" => code
+          }
+        } = conn
+      )
+      when not is_binary(code) do
+    set_errors!(conn, [error("missing_code", "No code received")])
+  end
+
   @doc false
   def handle_callback!(conn) do
-    set_errors!(conn, [error("missing_code", "No code received")])
+    set_errors!(conn, [error("csrf_failed", "Invalid response state")])
+  end
+
+  defp fetch_code_verifier!(conn) do
+    case get_code_verifier_cookie(conn) do
+      nil -> raise "could not fetch the code verifier"
+      code_verifier -> code_verifier
+    end
+  end
+
+  defp get_code_verifier_cookie(conn) do
+    conn
+    |> fetch_session()
+    |> Map.get(:cookies)
+    |> Map.get(@code_verifier_cookie)
   end
 
   defp verify_id_token({:ok, %AccessToken{id_token: id_token} = token}, conn)
@@ -129,6 +179,28 @@ defmodule Ueberauth.Strategy.Line do
     ])
   end
 
+  @doc """
+  Add nonce parameter to the `%Plug.Conn{}`.
+  """
+  @spec add_nonce_param(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
+  def add_nonce_param(conn, value) do
+    put_private(conn, :ueberauth_nonce_param, value)
+  end
+
+  @spec with_nonce_param(
+          keyword(),
+          Plug.Conn.t()
+        ) :: keyword()
+  def with_nonce_param(opts, conn) do
+    nonce = conn.private[:ueberauth_nonce_param]
+
+    if is_nil(nonce) do
+      opts
+    else
+      Keyword.put(opts, :nonce, nonce)
+    end
+  end
+
   @doc false
   def handle_cleanup!(conn) do
     conn
@@ -136,9 +208,10 @@ defmodule Ueberauth.Strategy.Line do
     |> put_private(:line_nonce, nil)
     |> put_private(:line_user, nil)
     |> put_private(:line_token, nil)
+    |> delete_resp_cookie(@code_verifier_cookie)
   end
 
-  #  TODO: check for existence of the optional fields like picture and email
+  #  TODO: check nonce in OpenId whether matches nonce stored in mnesia/ets
   defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture}}, conn) do
     user = %{
       name: name,
@@ -228,11 +301,5 @@ defmodule Ueberauth.Strategy.Line do
     conn
     |> options
     |> Keyword.get(key, default)
-  end
-
-  defp generate_nonce(conn) do
-    nonce = StringGenerator.generate_string(8)
-
-    {put_private(conn, :line_nonce, nonce), nonce}
   end
 end

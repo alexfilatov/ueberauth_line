@@ -1,15 +1,17 @@
-defmodule StringGenerator do
+defmodule LineLogin.Crypto.StringGenerator do
   @moduledoc """
   String generator for cryptographic purposes.
   """
 
   @doc """
-  Generate cryptographically random string.
+  Generate cryptographically random string. Url safe.
   """
   @spec generate_string(integer) :: binary
   def generate_string(length) when length > 0 do
-    :crypto.strong_rand_bytes(length)
-    |> Base.encode64(padding: false)
+    length
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64(padding: false)
+    |> String.replace("=", "_")
     |> binary_part(0, length)
   end
 end

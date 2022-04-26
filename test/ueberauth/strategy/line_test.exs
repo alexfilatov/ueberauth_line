@@ -46,7 +46,7 @@ defmodule Ueberauth.Strategy.LineTest do
 
     routes =
       Ueberauth.init()
-      |> set_options(conn, hd: "example.com", default_scope: "profile%20openid%20email")
+      |> set_options(conn, hd: "example.com", default_scope: "profile openid email")
 
     resp = Ueberauth.call(conn, routes)
 
@@ -61,7 +61,9 @@ defmodule Ueberauth.Strategy.LineTest do
              "client_id" => "client_id_valid",
              "redirect_uri" => "http://www.example.com/auth/line/callback",
              "response_type" => "code",
-             "scope" => "profile%20openid%20email"
+             "scope" => "profile openid email",
+             "code_challenge" => _,
+             "code_challenge_method" => "S256"
            } = Plug.Conn.Query.decode(redirect_uri.query)
   end
 

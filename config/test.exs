@@ -7,3 +7,6 @@ config :ueberauth,
        client_id: "client_id_valid",
        client_secret: "client_secret_valid",
        token_url: "token_url"
+
+# Change level to :debug for more details
+config :logger, level: :info
