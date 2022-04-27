@@ -28,7 +28,6 @@ defmodule LineLogin.Crypto.CodeChallenge do
 
   defp generate_code_challenge(code) do
     :crypto.hash(:sha256, code)
-    |> Base.url_encode64()
-    |> String.replace("=", "")
+    |> Base.url_encode64(padding: false)
   end
 end

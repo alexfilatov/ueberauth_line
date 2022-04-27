@@ -11,7 +11,6 @@ defmodule LineLogin.Crypto.StringGenerator do
     length
     |> :crypto.strong_rand_bytes()
     |> Base.url_encode64(padding: false)
-    |> String.replace("=", "_")
     |> binary_part(0, length)
   end
 end
