@@ -211,7 +211,23 @@ defmodule Ueberauth.Strategy.Line do
     |> delete_resp_cookie(@code_verifier_cookie)
   end
 
+  defp get_fake_sso_email(user_id) do
+    "#{user_id}@sso.line.me"
+  end
+
   #  TODO: check nonce in OpenId whether matches nonce stored in mnesia/ets
+  defp fetch_user({:ok, %OpenId{sub: sub, name: name, email: email, picture: picture}}, conn)
+       when is_nil(email) do
+    user = %{
+      name: name,
+      email: get_fake_sso_email(sub),
+      picture: picture
+    }
+
+    conn
+    |> put_private(:line_user, user)
+  end
+
   defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture}}, conn) do
     user = %{
       name: name,

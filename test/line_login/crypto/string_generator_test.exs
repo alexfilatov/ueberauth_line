@@ -1,6 +1,5 @@
 defmodule LineLogin.Crypto.StringGeneratorTest do
   use ExUnit.Case, async: true
-  use Plug.Test
 
   alias LineLogin.Crypto.StringGenerator
 
