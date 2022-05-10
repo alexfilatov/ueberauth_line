@@ -3,6 +3,7 @@ defmodule LineLogin.Request.GetProfile do
 
   alias LineLogin.Request.GetProfile
   alias LmHttp.RequestApi
+  alias LmHttp.Payload
 
   @behaviour RequestApi
 
@@ -31,7 +32,7 @@ defmodule LineLogin.Request.GetProfile do
 
   defp prepare_body(request) do
     request
-    |> Mappable.tomap(keys: :strings)
+    |> Mappable.to_map(keys: :strings)
     |> Payload.remove_nils()
     |> Payload.to_keyword()
   end

@@ -1,7 +1,6 @@
 defmodule LineLogin.Request.Token do
   use TypedStruct
 
-  alias LmHttp.RequestApi
   alias LineLogin.Request.Token
   alias LmHttp.RequestApi
   alias LmHttp.Payload

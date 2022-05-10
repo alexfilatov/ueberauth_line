@@ -14,9 +14,6 @@ defmodule LineLogin.MockServer do
 
   #  TODO: return matching access_tokens etc because they must be used in the integration flow
 
-  @doc """
-  Verify ID token. Nonce is optional.
-  """
   post "/oauth2/v2.1/verify" do
     case conn.body_params do
       %{

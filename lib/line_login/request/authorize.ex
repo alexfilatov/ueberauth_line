@@ -1,7 +1,6 @@
 defmodule LineLogin.Request.Authorize do
   use TypedStruct
 
-  alias LmHttp.RequestApi
   alias LineLogin.Request.Authorize
   alias LmHttp.RequestApi
   alias LmHttp.Payload

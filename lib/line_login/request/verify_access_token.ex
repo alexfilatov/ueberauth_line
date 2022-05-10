@@ -1,10 +1,8 @@
 defmodule LineLogin.Request.VerifyAccessToken do
   use TypedStruct
 
-  alias LmHttp.RequestApi
   alias LineLogin.Request.VerifyAccessToken
   alias LmHttp.RequestApi
-  alias LmHttp.Payload
 
   @behaviour RequestApi
 

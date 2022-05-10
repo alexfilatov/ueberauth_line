@@ -14,7 +14,6 @@ defmodule LineLogin.OAuth do
 
   defp join_params(params) do
     params
-    |> Enum.map(fn {k, v} -> "#{k}=#{v}" end)
-    |> Enum.join("&")
+    |> Enum.map_join("&", fn {k, v} -> "#{k}=#{v}" end)
   end
 end
