@@ -5,7 +5,7 @@ defmodule Ueberauth.Strategy.Line do
   use Ueberauth.Strategy,
     default_scope: "",
     profile_fields: "",
-    uid_field: :userId,
+    uid_field: :sub,
     allowed_request_params: [
       :auth_type
     ]
@@ -212,11 +212,12 @@ defmodule Ueberauth.Strategy.Line do
   end
 
   #  TODO: check nonce in OpenId whether matches nonce stored in mnesia/ets
-  defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture}}, conn) do
+  defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture, sub: sub}}, conn) do
     user = %{
       name: name,
       email: email,
-      picture: picture
+      picture: picture,
+      sub: sub
     }
 
     conn
