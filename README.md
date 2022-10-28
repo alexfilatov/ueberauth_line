@@ -68,3 +68,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
 ## Side notes
 This library uses Erlang `:crypto.strong_rand_bytes` for nonce and state generation. Make sure that `RAND_bytes` method from OpenSSL is available.
+
+## Testing
+For testing purposes, there is set up a cowboy server
+Credits go to: Sophie DeBenedetto https://medium.com/flatiron-labs/rolling-your-own-mock-server-for-testing-in-elixir-2cdb5ccdd1a0

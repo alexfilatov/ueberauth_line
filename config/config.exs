@@ -1,4 +1,6 @@
-use Mix.Config
+import Config
+
+config :ueberauth_line, api_base_url: "https://api.line.me"
 
 config :ueberauth,
        Ueberauth,
@@ -6,12 +8,10 @@ config :ueberauth,
          line:
            {Ueberauth.Strategy.Line,
             [
-              default_scope: "profile%20email"
+              default_scope: "profile openid email"
             ]}
        ]
 
-config :ueberauth,
-       Ueberauth.Strategy.Line.OAuth,
-       client_id: "randomClientId1234",
-       client_secret: "testClientSecret",
-       token_url: "token_url"
+# Import environment specific config. This must remain at the bottom
+# of this file so it overrides the configuration defined above.
+import_config "#{config_env()}.exs"
