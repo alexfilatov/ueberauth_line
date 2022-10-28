@@ -1,4 +1,8 @@
 defmodule LineLogin.Request.Token do
+  @moduledoc """
+  Line Login 2.1 Token serializer and request struct.
+  """
+
   use TypedStruct
 
   alias LineLogin.Request.Token

@@ -4,7 +4,8 @@ defmodule LineLogin.Crypto.StringGenerator do
   """
 
   @doc """
-  Generate cryptographically random string. Url safe.
+  Generate cryptographically random string.
+  The resulting string is URL safe.
   """
   @spec generate_string(integer) :: binary
   def generate_string(length) when length > 0 do

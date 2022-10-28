@@ -74,14 +74,13 @@ defmodule UeberauthLine.Mixfile do
     "An Uberauth strategy for LINE authentication."
   end
 
-  # TODO: update details of the forked repo
   defp package do
     [
       files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Alex Filatov", "Matt Chad"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/alexfilatov/ueberauth_line",
+        "GitHub" => "https://github.com/LucidModules/ueberauth_line",
         "Docs" => "https://hexdocs.pm/ueberauth_line"
       }
     ]

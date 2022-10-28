@@ -1,6 +1,6 @@
 defmodule LineLogin.Crypto.CodeChallenge do
   @moduledoc """
-  Code challenge generation.
+  Code challenge generation for PKCE compliant requests.
   """
 
   alias LineLogin.Crypto.StringGenerator

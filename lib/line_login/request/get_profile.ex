@@ -1,4 +1,8 @@
 defmodule LineLogin.Request.GetProfile do
+  @moduledoc """
+  Line Login 2.1 Get Profile serializer and request struct.
+  """
+
   use TypedStruct
 
   alias LineLogin.Request.GetProfile

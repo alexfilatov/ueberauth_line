@@ -1,4 +1,8 @@
 defmodule LineLogin.OAuth do
+  @moduledoc """
+  Provides authorize URL for Line Login.
+  """
+
   alias LineLogin.Request.Authorize
 
   def get_authorize_url(
