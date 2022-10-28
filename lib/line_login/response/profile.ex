@@ -1,4 +1,8 @@
 defmodule LineLogin.Response.Profile do
+  @moduledoc """
+  Line Login Profile response struct and deserializer.
+  """
+
   use TypedStruct
 
   alias LineLogin.Response.Profile

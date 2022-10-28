@@ -1,4 +1,8 @@
 defmodule LineLogin.Response.AccessToken do
+  @moduledoc """
+  Line Login Access Token response struct and deserializer.
+  """
+
   use TypedStruct
 
   alias LmHttp.ClientAdapter

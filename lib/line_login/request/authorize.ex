@@ -1,4 +1,8 @@
 defmodule LineLogin.Request.Authorize do
+  @moduledoc """
+  Line Login 2.1 Authorize serializer and request struct.
+  """
+
   use TypedStruct
 
   alias LineLogin.Request.Authorize

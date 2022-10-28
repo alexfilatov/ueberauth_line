@@ -1,4 +1,8 @@
 defmodule LineLogin.MockServer do
+  @moduledoc """
+  Mocked Line server for testing purposes.
+  """
+
   use Plug.Router
 
   require Logger

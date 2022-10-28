@@ -1,4 +1,8 @@
 defmodule LineLogin.Request.VerifyAccessToken do
+  @moduledoc """
+  Line Login 2.1 Verify Access Token serializer and request struct.
+  """
+
   use TypedStruct
 
   alias LineLogin.Request.VerifyAccessToken

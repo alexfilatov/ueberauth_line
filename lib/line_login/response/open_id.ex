@@ -1,4 +1,8 @@
 defmodule LineLogin.Response.OpenId do
+  @moduledoc """
+  Line Login OpenId response struct and deserializer.
+  """
+
   use TypedStruct
 
   alias LineLogin.Response.OpenId

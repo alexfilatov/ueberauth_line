@@ -1,4 +1,8 @@
 defmodule LineLogin.Response.Error do
+  @moduledoc """
+  Line Login Error response struct and deserializer.
+  """
+
   use TypedStruct
 
   alias LineLogin.ClientAdapter
