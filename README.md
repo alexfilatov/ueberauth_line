@@ -1,4 +1,4 @@
-# UeberauthLine [![Hex pm](https://img.shields.io/hexpm/v/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) [![hex.pm downloads](https://img.shields.io/hexpm/dt/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line)
+# UeberauthLine [![Hex pm](https://img.shields.io/hexpm/v/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) [![hex.pm downloads](https://img.shields.io/hexpm/dt/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) ![CI Build](https://github.com/LucidModules/ueberauth_line/actions/workflows/elixir.yml/badge.svg)
 
 **An Uberauth strategy for LINE OAuth2 authentication.**
 
@@ -70,5 +70,5 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 This library uses Erlang `:crypto.strong_rand_bytes` for nonce and state generation. Make sure that `RAND_bytes` method from OpenSSL is available.
 
 ## Testing
-For testing purposes, there is set up a cowboy server
-Credits go to: Sophie DeBenedetto https://medium.com/flatiron-labs/rolling-your-own-mock-server-for-testing-in-elixir-2cdb5ccdd1a0
+A Cowboy Mock server is available for testing purposes.
+Many thanks to Sophie DeBenedetto for the great tutorial on [server mocking in Elixir](https://medium.com/flatiron-labs/rolling-your-own-mock-server-for-testing-in-elixir-2cdb5ccdd1a0).
