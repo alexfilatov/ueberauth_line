@@ -45,21 +45,4 @@ defmodule LineLogin.ClientAdapter do
 
   defp deserialize_body(body) when is_binary(body), do: Jason.decode!(body)
   defp deserialize_body(body), do: body
-
-  #  TODO: handle other types
-  #  {:ok,
-  #    HTTPoison.Response.t()
-  #    | HTTPoison.AsyncResponse.t()
-  #    | HTTPoison.MaybeRedirect.t()}
-  #  | {:error, HTTPoison.Error.t()}
-
-  #  defp handle_result(result) do
-  #    case result do
-  #      {:ok, status, headers, ref} ->
-  #        %{status: status, body: process_body(ref), headers: headers}
-  #
-  #      {:error, reason} ->
-  #        {:error, reason}
-  #    end
-  #  end
 end
