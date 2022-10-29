@@ -1,4 +1,4 @@
-# UeberauthLine [![Hex pm](https://img.shields.io/hexpm/v/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) [![hex.pm downloads](https://img.shields.io/hexpm/dt/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) ![CI Build](https://github.com/LucidModules/ueberauth_line/actions/workflows/elixir.yml/badge.svg)
+# UeberauthLine [![Hex pm](https://img.shields.io/hexpm/v/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) [![hex.pm downloads](https://img.shields.io/hexpm/dt/ueberauth_line.svg?style=flat)](https://hex.pm/packages/ueberauth_line) ![CI Build](https://github.com/alexfilatov/ueberauth_line/actions/workflows/elixir.yml/badge.svg)
 
 **An Uberauth strategy for LINE OAuth2 authentication.**
 

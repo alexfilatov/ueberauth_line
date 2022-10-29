@@ -80,7 +80,7 @@ defmodule UeberauthLine.Mixfile do
       maintainers: ["Alex Filatov", "Matt Chad"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/LucidModules/ueberauth_line",
+        "GitHub" => "https://github.com/alexfilatov/ueberauth_line",
         "Docs" => "https://hexdocs.pm/ueberauth_line"
       }
     ]
