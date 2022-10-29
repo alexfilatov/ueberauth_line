@@ -47,7 +47,7 @@ defmodule UeberauthLine.Mixfile do
     [
       {:ueberauth, "~> 0.4"},
       {:jason, "~> 1.0"},
-      {:lm_http, git: "https://github.com/LucidModules/elixir-http", branch: "master"},
+      {:lm_http, "~> 0.4.0"},
       {:typed_struct, "~> 0.2.1"},
       {:mappable, "~> 0.2.0"},
       {:ex_doc, "~> 0.1", only: :dev},
