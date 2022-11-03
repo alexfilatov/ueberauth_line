@@ -13,7 +13,6 @@ defmodule Ueberauth.Strategy.Line do
   alias Ueberauth.Auth.Info
   alias Ueberauth.Auth.Credentials
   alias Ueberauth.Auth.Extra
-  alias LineLogin.Crypto.StringGenerator
   alias LineLogin.Crypto.CodeChallenge
   alias LineLogin.Api, as: LineApi
   alias LineLogin.Response.{AccessToken, OpenId, Error}
@@ -27,12 +26,6 @@ defmodule Ueberauth.Strategy.Line do
   Handles initial request for Line authentication.
   """
   def handle_request!(conn) do
-    nonce = StringGenerator.generate_string(8)
-
-    #    TODO: keep nonce in the ets or mnesia because it can't be passed in the cookies. This wouldn't prevent repeated attacks
-    # encrypt the nonce with aproppriate sha256
-    # set nonce time validity to few minutes (perhaps mnesia can do that)
-
     code_verifier = CodeChallenge.generate_code_verifier()
 
     authorize_request =
@@ -44,7 +37,6 @@ defmodule Ueberauth.Strategy.Line do
       |> put_scope(conn)
       |> put_code_challenge(code_verifier)
       |> with_state_param(conn)
-      #      |> with_nonce_param(conn)
       |> Authorize.new()
 
     authorize_url = OAuth.get_authorize_url(@line_authorize_host, authorize_request)
@@ -162,8 +154,6 @@ defmodule Ueberauth.Strategy.Line do
     %VerifyIdToken{
       id_token: id_token,
       client_id: client_id
-      #    TODO: dynamic nonce
-      #      nonce: "zaq123456"
     }
     |> LineApi.verify_id_token()
     |> fetch_user(conn)
@@ -211,7 +201,6 @@ defmodule Ueberauth.Strategy.Line do
     |> delete_resp_cookie(@code_verifier_cookie)
   end
 
-  #  TODO: check nonce in OpenId whether matches nonce stored in mnesia/ets
   defp fetch_user({:ok, %OpenId{name: name, email: email, picture: picture, sub: sub}}, conn) do
     user = %{
       name: name,
