@@ -11,7 +11,6 @@ defmodule LineLogin.Api.VerifyIdTokenTest do
       request = %VerifyIdToken{
         id_token: "id_token_valid",
         client_id: "client_id_valid",
-        nonce: "zaq123456",
         user_id: "qweqwe"
       }
 
@@ -22,7 +21,6 @@ defmodule LineLogin.Api.VerifyIdTokenTest do
                 aud: "1234567890",
                 exp: 1_504_169_092,
                 iat: 1_504_263_657,
-                nonce: "zaq123456",
                 amr: ["pwd"],
                 name: "Taro Line",
                 picture: "https://sample_line.me/aBcdefg123456",
@@ -34,7 +32,6 @@ defmodule LineLogin.Api.VerifyIdTokenTest do
       request = %VerifyIdToken{
         id_token: "invalid",
         client_id: "qwqwe",
-        nonce: "zaq123456",
         user_id: "qweqwe"
       }
 
